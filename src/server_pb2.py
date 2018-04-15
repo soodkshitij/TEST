@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='server.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0cserver.proto\"\x1d\n\rLeaderRequest\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\t\"&\n\x08ReadData\x12\r\n\x05start\x18\x01 \x01(\x03\x12\x0b\n\x03\x65nd\x18\x02 \x01(\x03\"\x1e\n\x0c\x42oolResponse\x12\x0e\n\x06result\x18\x01 \x01(\x08\" \n\x12ReplicationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"B\n\x0e\x43lientResponse\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tis_leader\x18\x02 \x01(\x08\x12\x11\n\tleader_id\x18\x03 \x01(\x05\"\x1a\n\tNodeState\x12\r\n\x05state\x18\x01 \x01(\t\"\xb8\x01\n\x07Request\x12\x12\n\nfromSender\x18\x01 \x01(\t\x12\x12\n\ntoReceiver\x18\x02 \x01(\t\x12\x16\n\x0eoriginalSender\x18\x03 \x01(\t\x12\x1c\n\x04ping\x18\x06 \x01(\x0b\x32\x0c.PingRequestH\x00\x12!\n\nputRequest\x18\x07 \x01(\x0b\x32\x0b.PutRequestH\x00\x12!\n\ngetRequest\x18\x08 \x01(\x0b\x32\x0b.GetRequestH\x00\x42\t\n\x07payload\"r\n\x08Response\x12\x19\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x0b.StatusCode\x12\x0b\n\x03msg\x18\x02 \x01(\t\x12\x1b\n\x08metaData\x18\x03 \x01(\x0b\x32\t.MetaData\x12!\n\x0b\x64\x61tFragment\x18\x04 \x01(\x0b\x32\x0c.DatFragment\"\x1a\n\x0bPingRequest\x12\x0b\n\x03msg\x18\x01 \x01(\t\"L\n\nPutRequest\x12\x1b\n\x08metaData\x18\x01 \x01(\x0b\x32\t.MetaData\x12!\n\x0b\x64\x61tFragment\x18\x02 \x01(\x0b\x32\x0c.DatFragment\"L\n\nGetRequest\x12\x1b\n\x08metaData\x18\x01 \x01(\x0b\x32\t.MetaData\x12!\n\x0bqueryParams\x18\x02 \x01(\x0b\x32\x0c.QueryParams\"/\n\x0bQueryParams\x12\x10\n\x08\x66rom_utc\x18\x01 \x01(\t\x12\x0e\n\x06to_utc\x18\x02 \x01(\t\"B\n\x08MetaData\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\x15\n\rnumOfFragment\x18\x02 \x01(\x05\x12\x11\n\tmediaType\x18\x03 \x01(\x05\"2\n\x0b\x44\x61tFragment\x12\x15\n\rtimestamp_utc\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c*-\n\nStatusCode\x12\x0b\n\x07Unknown\x10\x00\x12\x06\n\x02Ok\x10\x01\x12\n\n\x06\x46\x61iled\x10\x02\x32\xe1\x03\n\x14\x43ommunicationService\x12\'\n\x04ping\x12\x0e.LeaderRequest\x1a\r.BoolResponse\"\x00\x12\x39\n\x0fgetClientStatus\x12\x13.ReplicationRequest\x1a\x0f.ClientResponse\"\x00\x12\x31\n\tsetLeader\x12\x13.ReplicationRequest\x1a\r.BoolResponse\"\x00\x12\x33\n\x0brequestVote\x12\x13.ReplicationRequest\x1a\r.BoolResponse\"\x00\x12+\n\x0csetNodeState\x12\n.NodeState\x1a\r.BoolResponse\"\x00\x12;\n\rgetLeaderNode\x12\x13.ReplicationRequest\x1a\x13.ReplicationRequest\"\x00\x12#\n\nPutHandler\x12\x08.Request\x1a\t.Response(\x01\x12#\n\nGetHandler\x12\x08.Request\x1a\t.Response0\x01\x12,\n\x13GetFromLocalCluster\x12\x08.Request\x1a\t.Response0\x01\x12\x1b\n\x04Ping\x12\x08.Request\x1a\t.Responseb\x06proto3')
+  serialized_pb=_b('\n\x0cserver.proto\"\x1d\n\rLeaderRequest\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\t\"&\n\x08ReadData\x12\r\n\x05start\x18\x01 \x01(\x03\x12\x0b\n\x03\x65nd\x18\x02 \x01(\x03\"\x1e\n\x0c\x42oolResponse\x12\x0e\n\x06result\x18\x01 \x01(\x08\" \n\x12ReplicationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"B\n\x0e\x43lientResponse\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tis_leader\x18\x02 \x01(\x08\x12\x11\n\tleader_id\x18\x03 \x01(\x05\"\x1a\n\tNodeState\x12\r\n\x05state\x18\x01 \x01(\t\"\xb8\x01\n\x07Request\x12\x12\n\nfromSender\x18\x01 \x01(\t\x12\x12\n\ntoReceiver\x18\x02 \x01(\t\x12\x16\n\x0eoriginalSender\x18\x03 \x01(\t\x12\x1c\n\x04ping\x18\x06 \x01(\x0b\x32\x0c.PingRequestH\x00\x12!\n\nputRequest\x18\x07 \x01(\x0b\x32\x0b.PutRequestH\x00\x12!\n\ngetRequest\x18\x08 \x01(\x0b\x32\x0b.GetRequestH\x00\x42\t\n\x07payload\"r\n\x08Response\x12\x19\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x0b.StatusCode\x12\x0b\n\x03msg\x18\x02 \x01(\t\x12\x1b\n\x08metaData\x18\x03 \x01(\x0b\x32\t.MetaData\x12!\n\x0b\x64\x61tFragment\x18\x04 \x01(\x0b\x32\x0c.DatFragment\"\x1a\n\x0bPingRequest\x12\x0b\n\x03msg\x18\x01 \x01(\t\"L\n\nPutRequest\x12\x1b\n\x08metaData\x18\x01 \x01(\x0b\x32\t.MetaData\x12!\n\x0b\x64\x61tFragment\x18\x02 \x01(\x0b\x32\x0c.DatFragment\"L\n\nGetRequest\x12\x1b\n\x08metaData\x18\x01 \x01(\x0b\x32\t.MetaData\x12!\n\x0bqueryParams\x18\x02 \x01(\x0b\x32\x0c.QueryParams\"/\n\x0bQueryParams\x12\x10\n\x08\x66rom_utc\x18\x01 \x01(\t\x12\x0e\n\x06to_utc\x18\x02 \x01(\t\"B\n\x08MetaData\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\x15\n\rnumOfFragment\x18\x02 \x01(\x05\x12\x11\n\tmediaType\x18\x03 \x01(\x05\"2\n\x0b\x44\x61tFragment\x12\x15\n\rtimestamp_utc\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c*6\n\nStatusCode\x12\x0b\n\x07Unknown\x10\x00\x12\x06\n\x02Ok\x10\x01\x12\n\n\x06\x46\x61iled\x10\x02\x12\x07\n\x03\x45OF\x10\x03\x32\x8d\x04\n\x14\x43ommunicationService\x12\'\n\x04ping\x12\x0e.LeaderRequest\x1a\r.BoolResponse\"\x00\x12\x39\n\x0fgetClientStatus\x12\x13.ReplicationRequest\x1a\x0f.ClientResponse\"\x00\x12\x31\n\tsetLeader\x12\x13.ReplicationRequest\x1a\r.BoolResponse\"\x00\x12\x33\n\x0brequestVote\x12\x13.ReplicationRequest\x1a\r.BoolResponse\"\x00\x12+\n\x0csetNodeState\x12\n.NodeState\x1a\r.BoolResponse\"\x00\x12;\n\rgetLeaderNode\x12\x13.ReplicationRequest\x1a\x13.ReplicationRequest\"\x00\x12#\n\nPutHandler\x12\x08.Request\x1a\t.Response(\x01\x12#\n\nGetHandler\x12\x08.Request\x1a\t.Response0\x01\x12,\n\x13GetFromLocalCluster\x12\x08.Request\x1a\t.Response0\x01\x12*\n\x11PutToLocalCluster\x12\x08.Request\x1a\t.Response(\x01\x12\x1b\n\x04Ping\x12\x08.Request\x1a\t.Responseb\x06proto3')
 )
 
 _STATUSCODE = _descriptor.EnumDescriptor(
@@ -41,11 +41,15 @@ _STATUSCODE = _descriptor.EnumDescriptor(
       name='Failed', index=2, number=2,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='EOF', index=3, number=3,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
   serialized_start=905,
-  serialized_end=950,
+  serialized_end=959,
 )
 _sym_db.RegisterEnumDescriptor(_STATUSCODE)
 
@@ -53,6 +57,7 @@ StatusCode = enum_type_wrapper.EnumTypeWrapper(_STATUSCODE)
 Unknown = 0
 Ok = 1
 Failed = 2
+EOF = 3
 
 
 
@@ -753,8 +758,8 @@ _COMMUNICATIONSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=953,
-  serialized_end=1434,
+  serialized_start=962,
+  serialized_end=1487,
   methods=[
   _descriptor.MethodDescriptor(
     name='ping',
@@ -838,9 +843,18 @@ _COMMUNICATIONSERVICE = _descriptor.ServiceDescriptor(
     options=None,
   ),
   _descriptor.MethodDescriptor(
+    name='PutToLocalCluster',
+    full_name='CommunicationService.PutToLocalCluster',
+    index=9,
+    containing_service=None,
+    input_type=_REQUEST,
+    output_type=_RESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
     name='Ping',
     full_name='CommunicationService.Ping',
-    index=9,
+    index=10,
     containing_service=None,
     input_type=_REQUEST,
     output_type=_RESPONSE,

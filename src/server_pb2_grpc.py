@@ -59,6 +59,11 @@ class CommunicationServiceStub(object):
         request_serializer=server__pb2.Request.SerializeToString,
         response_deserializer=server__pb2.Response.FromString,
         )
+    self.PutToLocalCluster = channel.stream_unary(
+        '/CommunicationService/PutToLocalCluster',
+        request_serializer=server__pb2.Request.SerializeToString,
+        response_deserializer=server__pb2.Response.FromString,
+        )
     self.Ping = channel.unary_unary(
         '/CommunicationService/Ping',
         request_serializer=server__pb2.Request.SerializeToString,
@@ -133,6 +138,13 @@ class CommunicationServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def PutToLocalCluster(self, request_iterator, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def Ping(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -185,6 +197,11 @@ def add_CommunicationServiceServicer_to_server(servicer, server):
       ),
       'GetFromLocalCluster': grpc.unary_stream_rpc_method_handler(
           servicer.GetFromLocalCluster,
+          request_deserializer=server__pb2.Request.FromString,
+          response_serializer=server__pb2.Response.SerializeToString,
+      ),
+      'PutToLocalCluster': grpc.stream_unary_rpc_method_handler(
+          servicer.PutToLocalCluster,
           request_deserializer=server__pb2.Request.FromString,
           response_serializer=server__pb2.Response.SerializeToString,
       ),

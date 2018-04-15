@@ -6,7 +6,7 @@ import server_pb2_grpc
 import sys
 from Node import Server
 import logger as lg
-from mongoTest import get_count_of_data, get_data
+import mongoTestNew
 from utils import getEpochTime
 import config
 
@@ -110,14 +110,14 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         
         
         #fromTimestamp, toTimestamp = 1328114400000, 1328155200000
-        data_count = get_count_of_data(fromTimestamp, toTimestamp)
+        data_count = mongoTestNew.get_count_of_data(fromTimestamp, toTimestamp)
         print("Data count is",data_count)
         #TODO Move to config
         offset = 0 
         limit = 2000
         yield_count = 1
         while(offset<=data_count):
-            query_data = get_data(fromTimestamp, toTimestamp, offset, limit)
+            query_data = mongoTestNew.get_data(fromTimestamp, toTimestamp, offset, limit)
             response = server_pb2.Response(code=1, msg="froms-1",
                                        metaData = server_pb2.MetaData(uuid="",numOfFragment=int(data_count)),
                                        datFragment = server_pb2.DatFragment(timestamp_utc="",data=str(query_data).encode(encoding='utf_8'))
@@ -127,12 +127,25 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
             yield (response)
             offset = offset+limit
             
+            
     def PutHandler(self, request_iterator, context):
-        print("Inside put handler")
-        for req in request_iterator:
-            print("Debugging put handler request",req)
-        return server_pb2.Response(code=1)
+
         
+        print("Inside put handler")
+        serverlist=self.node.get_active_node_ids()
+        for req in request_iterator:
+            for node_id in serverlist:
+                client = self.node.get_client(node_id)
+                client.PutToLocalCluster((req.putRequest.datFragment.data).decode('utf-8'))
+            
+        return server_pb2.Response(code=1)
+    
+    def PutToLocalCluster(self, request_iterator, context):
+        print ("server inside PutToLocalCluster")
+        for req in request_iterator:
+            print ((req.putRequest.datFragment.data).decode('utf-8'))
+            mongoTestNew.put_data((req.putRequest.datFragment.data).decode('utf-8'))
+        return server_pb2.Response(code=1)
     
 
 def run(host, port, node):

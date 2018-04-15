@@ -1,5 +1,6 @@
 import uuid
 
+
 def process(file_obj, request = True, name=""):
     if request:
         name = uuid.uuid4().hex
@@ -24,7 +25,7 @@ def process(file_obj, request = True, name=""):
     if data:
         print ("Yielding data ",len(data))
         yield(data)
-    
+        
         
 if __name__ == '__main__':
     f =  open("data/meso.out")

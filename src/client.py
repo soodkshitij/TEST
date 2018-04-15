@@ -5,6 +5,7 @@ import config
 from sys import argv
 import logger as lg
 import time
+import chunktest
 
 logger = lg.get_logger()
 
@@ -56,8 +57,29 @@ class Client():
         for stream in self.stub.GetFromLocalCluster(req):
             yield(stream)
         
-    def PutHandler(self, data):
-        pass
+    def PutHandler(self,putData):
+        self.stub.PutHandler(self.create_streaming_request(putData))
+    
+    def create_streaming_request(self,putData):
+        req = server_pb2.Request(
+            fromSender='some put sender',
+            toReceiver='some put receiver',
+        putRequest=server_pb2.PutRequest(
+          metaData=server_pb2.MetaData(uuid='14829'),
+          datFragment=server_pb2.DatFragment(data= str(putData).encode(encoding='utf_8'))
+        ))
+        yield req
+    
+    def PutToLocalCluster(self, putData):
+        print("inside put to local cluster")
+        self.stub.PutToLocalCluster(self.create_streaming_request(putData))
+    
+    
+    def process(self, file):
+        for x in chunktest.process(None,request=False,name=file):
+            self.PutHandler("".join(x))
+        
+        
 
 
 def run():

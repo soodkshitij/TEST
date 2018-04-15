@@ -34,11 +34,11 @@ def get_data(fromTS, toTS, offset, limit):
         return list(get_mongo_connection().mesowest.mesowest.find({ "timestamp_utc" : { "$gt" :  fromTS, "$lt" : toTS}}))
 
 def put_data(content):
-
+    print ("inside mongo")
     splittedArray = []
     bulkInsertArray = []
-
-    for line in content:
+    print ("content")
+    for line in content.split('\n'):
         line = line.strip()
         splittedArray =  line.split()
 

@@ -95,5 +95,6 @@ service CommunicationService {
    rpc PutHandler(stream Request) returns (Response);
    rpc GetHandler(Request) returns (stream Response);
    rpc GetFromLocalCluster(Request) returns (stream Response);
+   rpc PutToLocalCluster(stream Request) returns (Response);
    rpc Ping(Request) returns (Response);
 }
