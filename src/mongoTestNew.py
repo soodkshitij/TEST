@@ -39,9 +39,10 @@ def put_data(content):
     bulkInsertArray = []
 
     for line in content:
-        splittedArray =  line.strip().split()
+        line = line.strip()
+        splittedArray =  line.split()
 
-        if len(splittedArray)==16 and splittedArray[0]!="STN":
+        if len(splittedArray)==16:
             singleTuple = {"station":splittedArray[0],"timestamp_utc":int(time.mktime(time.strptime(splittedArray[1], '%Y%m%d/%H%M'))) * 1000,"raw":line}
             bulkInsertArray.append(singleTuple)
 
@@ -53,9 +54,9 @@ def put_data(content):
     return True
     
 if __name__ == '__main__':
-    """list_of_files = glob.glob('./data/*.out') 
+    list_of_files = glob.glob('./data/*.out') 
     for file_name in list_of_files:
         file = open(file_name).readlines()
-        put_data(file)"""
-    print(get_count_of_data(981079200000, 1486004400000))
-    print(get_data(981079200000, 1486004400000,0,100))
+        put_data(file)
+    #print(get_count_of_data(981079200000, 1486004400000))
+    #print(get_data(981079200000, 1486004400000,0,100))
