@@ -14,7 +14,7 @@ import config
 from threading import Thread
 from queue import Queue
 q = Queue(maxsize=0)
-return_queue = Queue(maxsize=0)
+
 dqueue = []
 
 
@@ -60,10 +60,10 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         print("Inside gethandler")
         print(request.getRequest.queryParams)
         serverlist=self.node.get_active_node_ids()
-        
+        return_queue = Queue(maxsize=0)
         for node_id in serverlist:
             print("Connecting to node",node_id)
-            assign_to_node = (Thread(target=self.connect_to_node, args =(node_id,request,q,)))
+            assign_to_node = (Thread(target=self.connect_to_node, args =(node_id,request,return_queue,)))
             assign_to_node.setDaemon(True)
             assign_to_node.start()
         
@@ -71,16 +71,21 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         while(True):
             if (return_queue.qsize()):
                 print("queue data ",return_queue.qsize())
-                if not return_queue.qsize:
+                d = return_queue.get()
+                if not d:
+                    print("incrementing null count")
                     null_count+=1
                     continue
-                yield(return_queue.get())
+                yield(d)
             
             if null_count==len(serverlist):
+                print ("Breaking null check")
+                print ("null_count",null_count)
+                print ("server list",serverlist)
                 break
                 
             
-    def connect_to_node(self, node_id,request,q):
+    def connect_to_node(self, node_id,request,return_queue):
 #         channel = grpc.insecure_channel(hostdetails)
 #         stub = request_pb2_grpc.CommunicationServiceStub(channel)
         client = self.node.get_client(node_id)
@@ -90,9 +95,10 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         #toTimestamp = getEpochTime(request.getRequest.queryParams.to_utc)
         stream = client.GetFromLocalCluster(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
         for res in stream:
+            print ("inserting into queue")
             return_queue.put(res)
         return_queue.put(None)
-    
+        #print ("data count from "+str(node_id)+" is "+str(return_queue.qsize()))
     
         
     def GetFromLocalCluster(self, request, context):
@@ -109,12 +115,15 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         #TODO Move to config
         offset = 0 
         limit = 2000
+        yield_count = 1
         while(offset<=data_count):
             query_data = get_data(fromTimestamp, toTimestamp, offset, limit)
-            response = server_pb2.Response(code=1, msg="",
+            response = server_pb2.Response(code=1, msg="froms-1",
                                        metaData = server_pb2.MetaData(uuid="",numOfFragment=int(data_count)),
                                        datFragment = server_pb2.DatFragment(timestamp_utc="",data=str(query_data).encode(encoding='utf_8'))
                                        )
+            print ("yield count",yield_count)
+            yield_count+=1
             yield (response)
             offset = offset+limit
             
