@@ -18,13 +18,13 @@ def get_mongo_connection(host='localhost', port=27017):
             return None
     return con
 
-def get_count_of_data(from_timestamp, to_timestamp):
+def get_count_of_data(fromTS, toTS):
 
-    fromTS = int(time.mktime(time.strptime(from_timestamp, '%Y-%m-%d %H:%M:%S'))) * 1000
-    toTS = int(time.mktime(time.strptime(to_timestamp, '%Y-%m-%d %H:%M:%S'))) * 1000
+    #fromTS = int(time.mktime(time.strptime(from_timestamp, '%Y-%m-%d %H:%M:%S'))) * 1000
+    #toTS = int(time.mktime(time.strptime(to_timestamp, '%Y-%m-%d %H:%M:%S'))) * 1000
     return get_mongo_connection().mesowest.mesowest.find({ "timestamp_utc" : { "$gt" :  fromTS, "$lt" : toTS}}).count()
 
-def get_data(fromTs, toTs, offset, limit):
+def get_data(fromTS, toTS, offset, limit):
 
     #fromTS = int(time.mktime(time.strptime(from_timestamp, '%Y-%m-%d %H:%M:%S'))) * 1000
     #toTS = int(time.mktime(time.strptime(to_timestamp, '%Y-%m-%d %H:%M:%S'))) * 1000
@@ -53,9 +53,9 @@ def put_data(content):
     return True
     
 if __name__ == '__main__':
-    list_of_files = glob.glob('./data/*.out') 
+    """list_of_files = glob.glob('./data/*.out') 
     for file_name in list_of_files:
         file = open(file_name).readlines()
-        put_data(file)
-    #print(get_count_of_data("2001-02-01 18:00:00", "2017-02-01 19:00:00"))
-    #print(get_data("2012-02-01 18:00:00", "2012-02-01 19:00:00",0,100))
+        put_data(file)"""
+    print(get_count_of_data(981079200000, 1486004400000))
+    print(get_data(981079200000, 1486004400000,0,100))
