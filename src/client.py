@@ -72,7 +72,7 @@ class Client():
     
     def PutToLocalCluster(self, putData):
         print("inside put to local cluster")
-        self.stub.PutToLocalCluster(self.create_streaming_request(putData))
+        return self.stub.PutToLocalCluster(self.create_streaming_request(putData))
     
     
     def process(self, file):

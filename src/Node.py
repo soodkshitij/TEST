@@ -38,11 +38,12 @@ class Server():
             node_details = v[1]
             try:
                 c =Client(node_details[0], node_details[1])
-                self.clients[v[0]] = {'client_obj':c,'active':True,'host':node_details[0],'port':node_details[1]}
+                self.clients[v[0]] = {'client_obj':c,'active':True,'host':node_details[0],'port':node_details[1],'write_capacity_full':False}
             except:
-                self.clients[v[0]] = {'client_obj':None,'active':False,'host':node_details[0],'port':node_details[1]}
+                self.clients[v[0]] = {'client_obj':None,'active':False,'host':node_details[0],'port':node_details[1],'write_capacity_full':False}
         print ("done connecting to neighbours")
-        
+    
+    
     def get_client(self,node_id):
         client_obj = self.clients.get(node_id)['client_obj']
         if client_obj is None or self.clients.get(node_id)['active'] ==False:
@@ -73,6 +74,18 @@ class Server():
             if self.get_client(k[0]):
                 active_nodes.append(k[0])
         return active_nodes
+    
+    def get_active_node_ids_for_push(self):
+        active_nodes = []
+        for k in self.clients.items():
+            if self.get_client(k[0]) and not k[1].get('write_capacity_full'):
+                active_nodes.append(k[0])
+        return active_nodes
+    
+    def markNodeAsFull(self,node_id):
+        node_details = self.clients.get(node_id)
+        if node_details:
+            node_details['write_capacity_full'] = True 
                 
     
     def getActiveNodes(self):

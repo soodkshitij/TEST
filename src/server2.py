@@ -13,6 +13,7 @@ import config
 #aastha's import
 from threading import Thread
 from queue import Queue
+from collections import deque
 q = Queue(maxsize=0)
 
 dqueue = []
@@ -23,7 +24,7 @@ encoding = "UTF-8"
 
 server_port = None
 node_id = None
-space = None
+
 logger = None
 
 class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
@@ -161,9 +162,9 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         return server_pb2.Response(code=1)
     
     def PutToLocalCluster(self, request_iterator, context):
+        print ("server inside PutToLocalCluster")
         for req in request_iterator:
-            if(mongoTestNew.get_mongo_connection().mesowest.command("dbstats")["dataSize"]>space):
-                return server_pb2.Response(code=2)
+            print ((req.putRequest.datFragment.data).decode('utf-8'))
             mongoTestNew.put_data((req.putRequest.datFragment.data).decode('utf-8'))
         return server_pb2.Response(code=1)
     
@@ -197,9 +198,10 @@ if __name__ == '__main__':
     config.populate()
     node_id = config.get_node_id()
     node_details = config.get_node_details(node_id)
-    space = config.get_space()
     print(node_details[0])
     print(node_details[1])
     print(type(node_details[0]))
     print(type(node_details[1]))
     run(node_details[0],node_details[1],node_id)
+    
+    
