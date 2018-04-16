@@ -1,4 +1,8 @@
 syntax = "proto3";
+package grpcComm;
+option java_multiple_files = true;
+option java_package = "com.cmpe275.grpcComm";
+option java_outer_classname = "DataProto";
 
 message LeaderRequest {
     string data = 1;
@@ -85,16 +89,16 @@ enum StatusCode {
 }
 
 service CommunicationService {
-   rpc ping(LeaderRequest) returns(BoolResponse) {}
+   rpc pingInternal(LeaderRequest) returns(BoolResponse) {}
    rpc getClientStatus(ReplicationRequest) returns(ClientResponse) {}
    rpc setLeader(ReplicationRequest) returns (BoolResponse) {}
    rpc requestVote(ReplicationRequest) returns (BoolResponse) {}
    rpc setNodeState(NodeState) returns (BoolResponse) {}
    rpc getLeaderNode(ReplicationRequest) returns (ReplicationRequest) {}
    //interface, for inter-intra cluster communication
-   rpc PutHandler(stream Request) returns (Response);
-   rpc GetHandler(Request) returns (stream Response);
+   rpc putHandler(stream Request) returns (Response);
+   rpc getHandler(Request) returns (stream Response);
    rpc GetFromLocalCluster(Request) returns (stream Response);
    rpc PutToLocalCluster(stream Request) returns (Response);
-   rpc Ping(Request) returns (Response);
+   rpc ping(Request) returns (Response);
 }
