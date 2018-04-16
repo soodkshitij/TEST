@@ -8,7 +8,6 @@ c = Client('169.254.208.33',000)
 import server_pb2
 import server_pb2_grpc
 from server_pb2 import Request, GetRequest, QueryParams 
-c.
 
 #req = Request(fromSender="",toSender="",getRequest = GetRequest(queryParams=QueryParams(from_utc="2012-01-01",to_utc="2020-01-01"))
 # count = 0
