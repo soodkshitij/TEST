@@ -22,8 +22,8 @@ class Client():
         req = (server_pb2.ReplicationRequest(id=requested_by))
         return self.stub.getClientStatus(req)
     
-    def ping(self):
-        return self.stub.ping(server_pb2.LeaderRequest(data="empty"))
+    def pingInternal(self):
+        return self.stub.pingInternal(server_pb2.LeaderRequest(data="empty"))
     
     def setLeader(self,leader_id):
         return self.stub.setLeader(server_pb2.ReplicationRequest(id=leader_id))
@@ -34,7 +34,7 @@ class Client():
     def getLeaderNode(self, node_id):
         return self.stub.getLeaderNode(server_pb2.ReplicationRequest(id=node_id))
     
-    def GetHandler(self, from_timestamp, to_timestamp):
+    def getHandler(self, from_timestamp, to_timestamp):
         req = server_pb2.Request(
             fromSender='some put sender',
             toReceiver='some put receiver',
@@ -42,7 +42,7 @@ class Client():
           metaData=server_pb2.MetaData(uuid='14829'),
           queryParams=server_pb2.QueryParams(from_utc=from_timestamp,to_utc=to_timestamp))
         )
-        for stream in self.stub.GetHandler(req):
+        for stream in self.stub.getHandler(req):
             yield(stream)
             
     def GetFromLocalCluster(self, from_timestamp, to_timestamp):
@@ -57,8 +57,8 @@ class Client():
         for stream in self.stub.GetFromLocalCluster(req):
             yield(stream)
         
-    def PutHandler(self,putData):
-        self.stub.PutHandler(self.create_streaming_request(putData))
+    def putHandler(self,putData):
+        self.stub.putHandler(self.create_streaming_request(putData))
     
     def create_streaming_request(self,putData):
         req = server_pb2.Request(
@@ -77,16 +77,18 @@ class Client():
     
     def process(self, file):
         for x in chunktest.process(None,request=False,name=file):
-            self.PutHandler("".join(x))
+            self.putHandler("".join(x))
             
-    def Ping(self,data_msg):
+    def ping(self,data_msg):
+        print ("Insid ping")
         req = server_pb2.Request(
             fromSender='some put sender',
             toReceiver='some put receiver',
         ping=server_pb2.PingRequest(
           msg = data_msg
         ))
-        return self.stub.Ping(req)
+        print(req)
+        return self.stub.ping(req)
         
         
 

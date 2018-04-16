@@ -28,11 +28,15 @@ def get_data(fromTS, toTS, offset, limit):
 
     #fromTS = int(time.mktime(time.strptime(from_timestamp, '%Y-%m-%d %H:%M:%S'))) * 1000
     #toTS = int(time.mktime(time.strptime(to_timestamp, '%Y-%m-%d %H:%M:%S'))) * 1000
+    content= ""
     if offset or limit:
-        return list(get_mongo_connection().mesowest.mesowest.find({ "timestamp_utc" : { "$gt" :  fromTS, "$lt" : toTS}}).skip(offset).limit(limit))
+        data =  list(get_mongo_connection().mesowest.mesowest.find({ "timestamp_utc" : { "$gt" :  fromTS, "$lt" : toTS}},{'raw':1,'_id':0}).skip(offset).limit(limit))
     else:
-        return list(get_mongo_connection().mesowest.mesowest.find({ "timestamp_utc" : { "$gt" :  fromTS, "$lt" : toTS}}))
-
+        data =  list(get_mongo_connection().mesowest.mesowest.find({ "timestamp_utc" : { "$gt" :  fromTS, "$lt" : toTS}},{'raw':1,'_id':0}))
+    
+    for d in data:
+        content+=d['raw']+"\n"
+    return content
 def put_data(content):
     print ("inside mongo")
     splittedArray = []
@@ -55,8 +59,8 @@ def put_data(content):
     
 if __name__ == '__main__':
     list_of_files = glob.glob('./data/*.out') 
-    for file_name in list_of_files:
-        file = open(file_name).readlines()
-        put_data(file)
-    #print(get_count_of_data(981079200000, 1486004400000))
-    #print(get_data(981079200000, 1486004400000,0,100))
+    #for file_name in list_of_files:
+    #    file = open(file_name).readlines()
+    #    put_data(file)
+    print(get_count_of_data(1483228800000, 2483228800000))
+    print(get_data(1483228800000, 2483228800000,0,100))

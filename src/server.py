@@ -34,7 +34,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         self.node = Server(node_id)
         self.node.connect_neighbours()
     
-    def ping(self,request, context):
+    def pingInternal(self,request, context):
         return server_pb2.BoolResponse(result=True)
     
     def getClientStatus(self,request, context):
@@ -56,7 +56,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         logger.info("leader node for node-id {} is {}".format(str(self.node.id), str(leader_node)))
         return server_pb2.ReplicationRequest(id=leader_node)
     
-    def GetHandler(self, request, context):
+    def getHandler(self, request, context):
         print("Inside gethandler")
         print(request.getRequest.queryParams)
         serverlist=self.node.get_active_node_ids()
@@ -128,12 +128,13 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
             offset = offset+limit
             
             
-    def PutHandler(self, request_iterator, context):
+    def putHandler(self, request_iterator, context):
 
         
         print("Inside put handler")
         serverlist=self.node.get_active_node_ids()
         for req in request_iterator:
+            print (("req_stream",req.putRequest.datFragment.data))
             for node_id in serverlist:
                 client = self.node.get_client(node_id)
                 print ("sending put to node_id",node_id)
@@ -149,7 +150,8 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         return server_pb2.Response(code=1)
     
     
-    def Ping(self,req, context):
+    def ping(self,req, context):
+        print ("Inside server ping")
         return server_pb2.Response(code=1)
     
 

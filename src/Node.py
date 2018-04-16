@@ -33,6 +33,7 @@ class Server():
         self.leader_id = id
     
     def connect_neighbours(self):
+        print ("connecting to neighbours")
         for v in get_client_map().items():
             node_details = v[1]
             try:
@@ -40,6 +41,7 @@ class Server():
                 self.clients[v[0]] = {'client_obj':c,'active':True,'host':node_details[0],'port':node_details[1]}
             except:
                 self.clients[v[0]] = {'client_obj':None,'active':False,'host':node_details[0],'port':node_details[1]}
+        print ("done connecting to neighbours")
         
     def get_client(self,node_id):
         client_obj = self.clients.get(node_id)['client_obj']
@@ -47,7 +49,7 @@ class Server():
             #If none check whether connected again
             try:
                 client_obj = Client(self.clients.get(node_id)['host'],self.clients.get(node_id)['port'])
-                if client_obj.ping():
+                if client_obj.pingInternal():
                     (self.clients.get(node_id))['client_obj'] = client_obj
                     (self.clients.get(node_id))['active'] = True
             except:
@@ -58,7 +60,7 @@ class Server():
                 #check whether active
                 (self.clients.get(node_id))['client_obj'] = None
                 (self.clients.get(node_id))['active'] = False
-                client_obj.ping()
+                client_obj.pingInternal()
             except:
                 logger.info("Node {} not reachable".format(node_id))
                 return None
@@ -91,7 +93,7 @@ class Server():
             if(status.is_leader):
                 leader_node = status.leader_id
                 leader_client = self.get_client(leader_node)
-                if leader_client.ping():
+                if leader_client.pingInternal():
                     return leader_node
                 else:
                     logger.info("Unable to ping leader")
@@ -132,7 +134,7 @@ class Server():
             
             leader_client = self.get_client(self.leader_id)
             try:
-                if leader_client is None or not leader_client.ping():
+                if leader_client is None or not leader_client.pingInternal():
                     raise
             except:
                 leader_id = self.start_election()
@@ -177,7 +179,7 @@ class Server():
     def giveVote(self,id):
         if self.leader_id:
             leader_client = self.get_client(self.leader_id)
-            if leader_client and leader_client.ping():
+            if leader_client and leader_client.pingInternal():
                 return False
         if self.status in  ("LEADER",'CANDIDATE') or self.voted:
             logger.info("Not giving vote to node %d",id)
