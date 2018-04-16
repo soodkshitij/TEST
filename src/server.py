@@ -156,7 +156,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                     else:
                         print ("Marking node as full ",node_id)
                         self.node.markNodeAsFull(node_id)
-                        serverlist.pop(st_inx)
+                        serverlist.pop(st_idx)
                 
         return server_pb2.Response(code=1)
     
