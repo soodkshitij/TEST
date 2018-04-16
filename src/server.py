@@ -96,7 +96,13 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         stream = client.GetFromLocalCluster(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
         for res in stream:
             print ("inserting into queue")
-            return_queue.put(res)
+            if res.datFragment.data:
+                print(res.datFragment.data)
+                print("yes data")
+                return_queue.put(res)
+            else:
+                print (res.datFragment.data)
+                print ("no data")
         return_queue.put(None)
         #print ("data count from "+str(node_id)+" is "+str(return_queue.qsize()))
     
@@ -131,13 +137,14 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         print ("Pusing data to ",node_id)
         client = self.node.get_client(node_id)
         res = client.PutToLocalCluster((req.putRequest.datFragment.data).decode('utf-8'))
-        if res!=1:
+        if res.code!=1:
             return False
         return True
             
             
     def putHandler(self, request_iterator, context):
         serverlist=self.node.get_active_node_ids_for_push()
+        print ("serverlist ",serverlist)
         print("Inside put handler")
         
         st_idx = 0
@@ -157,12 +164,16 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                         print ("Marking node as full ",node_id)
                         self.node.markNodeAsFull(node_id)
                         serverlist.pop(st_idx)
+                        if not serverlist:
+                            return server_pb2.Response(code=2)
+                        node_id = serverlist[st_idx]
                 
         return server_pb2.Response(code=1)
     
     def PutToLocalCluster(self, request_iterator, context):
         for req in request_iterator:
             if(mongoTestNew.get_mongo_connection().mesowest.command("dbstats")["dataSize"]>space):
+                print ("Inside PutToLocalCluster returening node full")
                 return server_pb2.Response(code=2)
             mongoTestNew.put_data((req.putRequest.datFragment.data).decode('utf-8'))
         return server_pb2.Response(code=1)

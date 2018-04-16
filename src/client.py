@@ -58,7 +58,7 @@ class Client():
             yield(stream)
         
     def putHandler(self,putData):
-        self.stub.putHandler(self.create_streaming_request(putData))
+        return self.stub.putHandler(self.create_streaming_request(putData))
     
     def create_streaming_request(self,putData):
         req = server_pb2.Request(
@@ -77,7 +77,7 @@ class Client():
     
     def process(self, file):
         for x in chunktest.process(None,request=False,name=file):
-            self.putHandler("".join(x))
+            print(self.putHandler("".join(x)))
             
     def ping(self,data_msg):
         print ("Insid ping")
