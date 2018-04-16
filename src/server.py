@@ -136,6 +136,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         for req in request_iterator:
             for node_id in serverlist:
                 client = self.node.get_client(node_id)
+                print ("sending put to node_id",node_id)
                 client.PutToLocalCluster((req.putRequest.datFragment.data).decode('utf-8'))
             
         return server_pb2.Response(code=1)
@@ -145,6 +146,10 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         for req in request_iterator:
             print ((req.putRequest.datFragment.data).decode('utf-8'))
             mongoTestNew.put_data((req.putRequest.datFragment.data).decode('utf-8'))
+        return server_pb2.Response(code=1)
+    
+    
+    def Ping(self,req, context):
         return server_pb2.Response(code=1)
     
 

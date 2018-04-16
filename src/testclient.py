@@ -9,10 +9,14 @@ import server_pb2_grpc
 from server_pb2 import Request, GetRequest, QueryParams 
 
 #req = Request(fromSender="",toSender="",getRequest = GetRequest(queryParams=QueryParams(from_utc="2012-01-01",to_utc="2020-01-01"))
-count = 0
-for x in (c.GetHandler('2012-01-01','2020-01-01')):
-    count+=1
-    print ("count ",count)
-    print(x)
+# count = 0
+# for x in (c.GetHandler('2012-01-01','2020-01-01')):
+#     count+=1
+#     print ("count ",count)
+#     print(x)
+
+
+res = c.Ping("hello")
+print (res)
 
 #print(c.GetHandler(1, 2))

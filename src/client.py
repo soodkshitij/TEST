@@ -78,6 +78,15 @@ class Client():
     def process(self, file):
         for x in chunktest.process(None,request=False,name=file):
             self.PutHandler("".join(x))
+            
+    def Ping(self,data_msg):
+        req = server_pb2.Request(
+            fromSender='some put sender',
+            toReceiver='some put receiver',
+        ping=server_pb2.PingRequest(
+          msg = data_msg
+        ))
+        return self.stub.Ping(req)
         
         
 
