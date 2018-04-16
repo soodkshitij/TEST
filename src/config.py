@@ -22,3 +22,5 @@ def get_node_details(node_id):
 def get_client_map():
     return client_map
 
+def get_space():
+    return int(config.get('DEFAULT','space'))
