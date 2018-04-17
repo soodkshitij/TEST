@@ -9,6 +9,7 @@ import logger as lg
 import mongoTestNew
 from utils import getEpochTime
 import config
+from client import Client
 
 #aastha's import
 from threading import Thread
@@ -62,7 +63,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
     
     def getHandler(self, request, context):
         print(request.getRequest.queryParams)
-        
+        print(request)
         #checking bloomfilter
         d = int(time.mktime(time.strptime(request.getRequest.queryParams.from_utc, '%Y-%m-%d %H:%M:%S')))
         toDate = int(time.mktime(time.strptime(request.getRequest.queryParams.to_utc, '%Y-%m-%d %H:%M:%S')))
@@ -70,7 +71,9 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         while d <= toDate:
             date_to_check = (datetime.datetime.fromtimestamp(d).strftime('%Y%m%d'))
             c = self.node.bloomfilter
+            print ("checking bloom filter ",date_to_check)
             if c.testdate(date_to_check):
+                print ("blloom filter said yes")
                 process_internal = True
                 break
             d += (24*60*60)
@@ -105,7 +108,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                     break
         else:
              if request.fromSender =="prof":
-                 external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get/")
+                 external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
                  external_hosts = external_hosts.split(",")
                  request.fromSender = ""
                  leader_details = config.get_node_details(self.node.leader_id)
@@ -114,7 +117,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                      if host_details==leader_details[0]:
                          continue
                      print("Connecting to host",host_details)
-                     assign_to_node = (Thread(target=self.connect_to_external_node, args =(host_details,request,return_queue,)))
+                     assign_to_node = (Thread(target=self.connect_to_external_node, args =(host_details,request,return_queue_external,)))
                      assign_to_node.setDaemon(True)
                      assign_to_node.start()
                  null_count = 0
@@ -131,7 +134,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                     if null_count==len(external_hosts)-1:
                         print ("Breaking null check")
                         print ("null_count",null_count)
-                        print ("server list",serverlist)
+                        print ("server list",external_hosts)
                         break        
                     
                      
@@ -270,15 +273,19 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         return dates
     
     def updateBloomFilter(self, request, context):
-        clients = self.node.getActiveNodes()
+        nodeids = self.node.get_active_node_ids()
         dates_set = set()
-        for client in clients:
-            data = client.getUniqueDateIds(server_pb2.EmptyRequest())
+        for node in nodeids:
+            client = self.node.get_client(node)
+            if client is None:
+                continue
+            data = client.getUniqueDateIds()
             for d in data.dates:
                 dates_set.add(d.date)
-                
+        print ("bloom filter dates",dates_set)
         c = CreateBloomFilter(len(dates_set),dates_set)
         self.node.bloomfilter = c
+        return server_pb2.BoolResponse(result=True)
                 
         
     

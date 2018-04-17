@@ -38,7 +38,7 @@ class Client():
     
     def getHandler(self, from_timestamp, to_timestamp):
         req = server_pb2.Request(
-            fromSender='some put sender',
+            fromSender='prof',
             toReceiver='some put receiver',
         getRequest=server_pb2.GetRequest(
           metaData=server_pb2.MetaData(uuid='14829'),
@@ -109,8 +109,10 @@ def run():
     node_details = config.get_node_details(node_id)
     logger.info("Connecting to host {} on port {}".format(node_details[0], node_details[1]))
     c = Client(node_details[0],node_details[1])
+    c.updateBloomFilter()
     leader_node = 0
     heart_beat_count = 0
+    requests.get("http://cmpe275-spring-18.mybluemix.net/delete/"+(config.get_node_details(node_id))[0])
     while(True):
         time.sleep(heartbeat_interval)
         heart_beat_count+=1
