@@ -137,22 +137,24 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
     
                
     def connect_to_external_node(self, host_details,request,return_queue):
-        client = Client(host=host_details,port=8080)
-        print("at..." + str(host_details))
-        print("Inside connect_to_node",request.getRequest.queryParams)
-        #fromTimestamp = getEpochTime(request.getRequest.queryParams.from_utc)
-        #toTimestamp = getEpochTime(request.getRequest.queryParams.to_utc)
-        stream = client.GetFromLocalCluster(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
-        for res in stream:
-            print ("inserting into queue")
-            if res.datFragment.data:
-                print(res.datFragment.data)
-                print("yes data")
-                return_queue.put(res)
-            else:
-                print (res.datFragment.data)
-                print ("no data")
-        return_queue.put(None)
+        try:
+            client = Client(host=host_details,port=8080)
+            print("at..." + str(host_details))
+            print("Inside connect_to_node",request.getRequest.queryParams)
+            #fromTimestamp = getEpochTime(request.getRequest.queryParams.from_utc)
+            #toTimestamp = getEpochTime(request.getRequest.queryParams.to_utc)
+            stream = client.getHandler(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
+            for res in stream:
+                print ("inserting into queue")
+                if res.datFragment.data:
+                    print(res.datFragment.data)
+                    print("yes data")
+                    return_queue.put(res)
+                else:
+                    print (res.datFragment.data)
+                    print ("no data")
+        finally:
+            return_queue.put(None)
     
     
             
@@ -304,8 +306,4 @@ if __name__ == '__main__':
     node_id = config.get_node_id()
     node_details = config.get_node_details(node_id)
     space = config.get_space()
-    print(node_details[0])
-    print(node_details[1])
-    print(type(node_details[0]))
-    print(type(node_details[1]))
     run(node_details[0],node_details[1],node_id)
