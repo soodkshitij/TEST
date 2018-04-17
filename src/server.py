@@ -13,6 +13,8 @@ import config
 #aastha's import
 from threading import Thread
 from queue import Queue
+from createbloomfilter import CreateBloomFilter
+import requests
 q = Queue(maxsize=0)
 
 dqueue = []
@@ -57,33 +59,102 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         return server_pb2.ReplicationRequest(id=leader_node)
     
     def getHandler(self, request, context):
-        print("Inside gethandler")
         print(request.getRequest.queryParams)
-        serverlist=self.node.get_active_node_ids()
-        return_queue = Queue(maxsize=0)
-        for node_id in serverlist:
-            print("Connecting to node",node_id)
-            assign_to_node = (Thread(target=self.connect_to_node, args =(node_id,request,return_queue,)))
-            assign_to_node.setDaemon(True)
-            assign_to_node.start()
         
-        null_count = 0        
-        while(True):
-            if (return_queue.qsize()):
-                print("queue data ",return_queue.qsize())
-                d = return_queue.get()
-                if not d:
-                    print("incrementing null count")
-                    null_count+=1
-                    continue
-                yield(d)
-            
-            if null_count==len(serverlist):
-                print ("Breaking null check")
-                print ("null_count",null_count)
-                print ("server list",serverlist)
+        #checking bloomfilter
+        d = int(time.mktime(time.strptime(request.getRequest.queryParams.from_utc, '%Y-%m-%d %H:%M:%S')))
+        toDate = int(time.mktime(time.strptime(request.getRequest.queryParams.to_utc, '%Y-%m-%d %H:%M:%S')))
+        process_internal = False
+        while d <= toDate:
+            date_to_check = (datetime.datetime.fromtimestamp(d).strftime('%Y%m%d'))
+            c = self.node.bloomfilter
+            if c.testdate(date_to_check):
+                process_internal = True
                 break
+            d += (24*60*60)
+        
+        
+        
+        
+        if process_internal:
+            serverlist=self.node.get_active_node_ids()
+            return_queue = Queue(maxsize=0)
+            for node_id in serverlist:
+                print("Connecting to node",node_id)
+                assign_to_node = (Thread(target=self.connect_to_node, args =(node_id,request,return_queue,)))
+                assign_to_node.setDaemon(True)
+                assign_to_node.start()
+            
+            null_count = 0        
+            while(True):
+                if (return_queue.qsize()):
+                    print("queue data ",return_queue.qsize())
+                    d = return_queue.get()
+                    if not d:
+                        print("incrementing null count")
+                        null_count+=1
+                        continue
+                    yield(d)
                 
+                if null_count==len(serverlist):
+                    print ("Breaking null check")
+                    print ("null_count",null_count)
+                    print ("server list",serverlist)
+                    break
+        else:
+             if request.fromSender =="prof":
+                 external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get/")
+                 external_hosts = external_hosts.split(",")
+                 request.fromSender = ""
+                 leader_details = config.get_node_details(self.node.leader_id)
+                 return_queue_external = Queue(maxsize=0)
+                 for host_details in external_hosts:
+                     if host_details==leader_details[0]:
+                         continue
+                     print("Connecting to host",host_details)
+                     assign_to_node = (Thread(target=self.connect_to_external_node, args =(host_details,request,return_queue,)))
+                     assign_to_node.setDaemon(True)
+                     assign_to_node.start()
+                 null_count = 0
+                 while(True):
+                    if (return_queue_external.qsize()):
+                        print("queue data ",return_queue_external.qsize())
+                        d = return_queue_external.get()
+                        if not d:
+                            print("incrementing null count")
+                            null_count+=1
+                            continue
+                        yield(d)
+                    
+                    if null_count==len(external_hosts)-1:
+                        print ("Breaking null check")
+                        print ("null_count",null_count)
+                        print ("server list",serverlist)
+                        break        
+                    
+                     
+                     
+    
+               
+    def connect_to_external_node(self, host_details,request,return_queue):
+        client = Client(host=host_details,port=8080)
+        print("at..." + str(host_details))
+        print("Inside connect_to_node",request.getRequest.queryParams)
+        #fromTimestamp = getEpochTime(request.getRequest.queryParams.from_utc)
+        #toTimestamp = getEpochTime(request.getRequest.queryParams.to_utc)
+        stream = client.GetFromLocalCluster(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
+        for res in stream:
+            print ("inserting into queue")
+            if res.datFragment.data:
+                print(res.datFragment.data)
+                print("yes data")
+                return_queue.put(res)
+            else:
+                print (res.datFragment.data)
+                print ("no data")
+        return_queue.put(None)
+    
+    
             
     def connect_to_node(self, node_id,request,return_queue):
 #         channel = grpc.insecure_channel(hostdetails)
@@ -182,6 +253,30 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
     def ping(self,req, context):
         print ("Inside server ping")
         return server_pb2.Response(code=1)
+    
+    def getUniqueDateIds(self,request, context):
+        print (request)
+        data = mongoTestNew.get_dates()
+        
+        dates = server_pb2.DateResponse()
+        for d in data:
+            d_t = dates.dates.add()
+            d_t.date = d
+        #extend
+        return dates
+    
+    def updateBloomFilter(self, request, context):
+        clients = self.node.getActiveNodes()
+        dates_set = set()
+        for client in clients:
+            data = client.getUniqueDateIds(server_pb2.EmptyRequest())
+            for d in data.dates:
+                dates_set.add(d.date)
+                
+        c = CreateBloomFilter(len(dates_set),dates_set)
+        self.node.bloomfilter = c
+                
+        
     
 
 def run(host, port, node):

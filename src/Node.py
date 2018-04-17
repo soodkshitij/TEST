@@ -17,6 +17,7 @@ class Server():
         self.vote_count = 0
         self.clients = {}
         self.voted = False
+        self.bloomfilter = None
     
     
     def getLeaderId(self):

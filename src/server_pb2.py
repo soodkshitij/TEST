@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='server.proto',
   package='grpcComm',
   syntax='proto3',
-  serialized_pb=_b('\n\x0cserver.proto\x12\x08grpcComm\"\x1d\n\rLeaderRequest\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\t\"&\n\x08ReadData\x12\r\n\x05start\x18\x01 \x01(\x03\x12\x0b\n\x03\x65nd\x18\x02 \x01(\x03\"\x1e\n\x0c\x42oolResponse\x12\x0e\n\x06result\x18\x01 \x01(\x08\" \n\x12ReplicationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"B\n\x0e\x43lientResponse\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tis_leader\x18\x02 \x01(\x08\x12\x11\n\tleader_id\x18\x03 \x01(\x05\"\x1a\n\tNodeState\x12\r\n\x05state\x18\x01 \x01(\t\"\xd3\x01\n\x07Request\x12\x12\n\nfromSender\x18\x01 \x01(\t\x12\x12\n\ntoReceiver\x18\x02 \x01(\t\x12\x16\n\x0eoriginalSender\x18\x03 \x01(\t\x12%\n\x04ping\x18\x06 \x01(\x0b\x32\x15.grpcComm.PingRequestH\x00\x12*\n\nputRequest\x18\x07 \x01(\x0b\x32\x14.grpcComm.PutRequestH\x00\x12*\n\ngetRequest\x18\x08 \x01(\x0b\x32\x14.grpcComm.GetRequestH\x00\x42\t\n\x07payload\"\x8d\x01\n\x08Response\x12\"\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x14.grpcComm.StatusCode\x12\x0b\n\x03msg\x18\x02 \x01(\t\x12$\n\x08metaData\x18\x03 \x01(\x0b\x32\x12.grpcComm.MetaData\x12*\n\x0b\x64\x61tFragment\x18\x04 \x01(\x0b\x32\x15.grpcComm.DatFragment\"\x1a\n\x0bPingRequest\x12\x0b\n\x03msg\x18\x01 \x01(\t\"^\n\nPutRequest\x12$\n\x08metaData\x18\x01 \x01(\x0b\x32\x12.grpcComm.MetaData\x12*\n\x0b\x64\x61tFragment\x18\x02 \x01(\x0b\x32\x15.grpcComm.DatFragment\"^\n\nGetRequest\x12$\n\x08metaData\x18\x01 \x01(\x0b\x32\x12.grpcComm.MetaData\x12*\n\x0bqueryParams\x18\x02 \x01(\x0b\x32\x15.grpcComm.QueryParams\"/\n\x0bQueryParams\x12\x10\n\x08\x66rom_utc\x18\x01 \x01(\t\x12\x0e\n\x06to_utc\x18\x02 \x01(\t\"B\n\x08MetaData\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\x15\n\rnumOfFragment\x18\x02 \x01(\x05\x12\x11\n\tmediaType\x18\x03 \x01(\x05\"2\n\x0b\x44\x61tFragment\x12\x15\n\rtimestamp_utc\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c*6\n\nStatusCode\x12\x0b\n\x07Unknown\x10\x00\x12\x06\n\x02Ok\x10\x01\x12\n\n\x06\x46\x61iled\x10\x02\x12\x07\n\x03\x45OF\x10\x03\x32\xdb\x05\n\x14\x43ommunicationService\x12\x41\n\x0cpingInternal\x12\x17.grpcComm.LeaderRequest\x1a\x16.grpcComm.BoolResponse\"\x00\x12K\n\x0fgetClientStatus\x12\x1c.grpcComm.ReplicationRequest\x1a\x18.grpcComm.ClientResponse\"\x00\x12\x43\n\tsetLeader\x12\x1c.grpcComm.ReplicationRequest\x1a\x16.grpcComm.BoolResponse\"\x00\x12\x45\n\x0brequestVote\x12\x1c.grpcComm.ReplicationRequest\x1a\x16.grpcComm.BoolResponse\"\x00\x12=\n\x0csetNodeState\x12\x13.grpcComm.NodeState\x1a\x16.grpcComm.BoolResponse\"\x00\x12M\n\rgetLeaderNode\x12\x1c.grpcComm.ReplicationRequest\x1a\x1c.grpcComm.ReplicationRequest\"\x00\x12\x35\n\nputHandler\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response(\x01\x12\x35\n\ngetHandler\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response0\x01\x12>\n\x13GetFromLocalCluster\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response0\x01\x12<\n\x11PutToLocalCluster\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response(\x01\x12-\n\x04ping\x12\x11.grpcComm.Request\x1a\x12.grpcComm.ResponseB#\n\x14\x63om.cmpe275.grpcCommB\tDataProtoP\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0cserver.proto\x12\x08grpcComm\"\x1d\n\rLeaderRequest\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\t\"&\n\x08ReadData\x12\r\n\x05start\x18\x01 \x01(\x03\x12\x0b\n\x03\x65nd\x18\x02 \x01(\x03\"\x1e\n\x0c\x42oolResponse\x12\x0e\n\x06result\x18\x01 \x01(\x08\" \n\x12ReplicationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"B\n\x0e\x43lientResponse\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tis_leader\x18\x02 \x01(\x08\x12\x11\n\tleader_id\x18\x03 \x01(\x05\"\x1a\n\tNodeState\x12\r\n\x05state\x18\x01 \x01(\t\"\xd3\x01\n\x07Request\x12\x12\n\nfromSender\x18\x01 \x01(\t\x12\x12\n\ntoReceiver\x18\x02 \x01(\t\x12\x16\n\x0eoriginalSender\x18\x03 \x01(\t\x12%\n\x04ping\x18\x06 \x01(\x0b\x32\x15.grpcComm.PingRequestH\x00\x12*\n\nputRequest\x18\x07 \x01(\x0b\x32\x14.grpcComm.PutRequestH\x00\x12*\n\ngetRequest\x18\x08 \x01(\x0b\x32\x14.grpcComm.GetRequestH\x00\x42\t\n\x07payload\"\x8d\x01\n\x08Response\x12\"\n\x04\x63ode\x18\x01 \x01(\x0e\x32\x14.grpcComm.StatusCode\x12\x0b\n\x03msg\x18\x02 \x01(\t\x12$\n\x08metaData\x18\x03 \x01(\x0b\x32\x12.grpcComm.MetaData\x12*\n\x0b\x64\x61tFragment\x18\x04 \x01(\x0b\x32\x15.grpcComm.DatFragment\"\x1a\n\x0bPingRequest\x12\x0b\n\x03msg\x18\x01 \x01(\t\"^\n\nPutRequest\x12$\n\x08metaData\x18\x01 \x01(\x0b\x32\x12.grpcComm.MetaData\x12*\n\x0b\x64\x61tFragment\x18\x02 \x01(\x0b\x32\x15.grpcComm.DatFragment\"^\n\nGetRequest\x12$\n\x08metaData\x18\x01 \x01(\x0b\x32\x12.grpcComm.MetaData\x12*\n\x0bqueryParams\x18\x02 \x01(\x0b\x32\x15.grpcComm.QueryParams\"/\n\x0bQueryParams\x12\x10\n\x08\x66rom_utc\x18\x01 \x01(\t\x12\x0e\n\x06to_utc\x18\x02 \x01(\t\"B\n\x08MetaData\x12\x0c\n\x04uuid\x18\x01 \x01(\t\x12\x15\n\rnumOfFragment\x18\x02 \x01(\x05\x12\x11\n\tmediaType\x18\x03 \x01(\x05\"2\n\x0b\x44\x61tFragment\x12\x15\n\rtimestamp_utc\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"\x0e\n\x0c\x45mptyRequest\".\n\x0c\x44\x61teResponse\x12\x1e\n\x05\x64\x61tes\x18\x01 \x03(\x0b\x32\x0f.grpcComm.Dates\"\x15\n\x05\x44\x61tes\x12\x0c\n\x04\x64\x61te\x18\x01 \x01(\t*6\n\nStatusCode\x12\x0b\n\x07Unknown\x10\x00\x12\x06\n\x02Ok\x10\x01\x12\n\n\x06\x46\x61iled\x10\x02\x12\x07\n\x03\x45OF\x10\x03\x32\xe8\x06\n\x14\x43ommunicationService\x12\x41\n\x0cpingInternal\x12\x17.grpcComm.LeaderRequest\x1a\x16.grpcComm.BoolResponse\"\x00\x12K\n\x0fgetClientStatus\x12\x1c.grpcComm.ReplicationRequest\x1a\x18.grpcComm.ClientResponse\"\x00\x12\x43\n\tsetLeader\x12\x1c.grpcComm.ReplicationRequest\x1a\x16.grpcComm.BoolResponse\"\x00\x12\x45\n\x0brequestVote\x12\x1c.grpcComm.ReplicationRequest\x1a\x16.grpcComm.BoolResponse\"\x00\x12=\n\x0csetNodeState\x12\x13.grpcComm.NodeState\x1a\x16.grpcComm.BoolResponse\"\x00\x12M\n\rgetLeaderNode\x12\x1c.grpcComm.ReplicationRequest\x1a\x1c.grpcComm.ReplicationRequest\"\x00\x12\x35\n\nputHandler\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response(\x01\x12\x35\n\ngetHandler\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response0\x01\x12>\n\x13GetFromLocalCluster\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response0\x01\x12<\n\x11PutToLocalCluster\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response(\x01\x12-\n\x04ping\x12\x11.grpcComm.Request\x1a\x12.grpcComm.Response\x12\x44\n\x10getUniqueDateIds\x12\x16.grpcComm.EmptyRequest\x1a\x16.grpcComm.DateResponse\"\x00\x12\x45\n\x11updateBloomFilter\x12\x16.grpcComm.EmptyRequest\x1a\x16.grpcComm.BoolResponse\"\x00\x42#\n\x14\x63om.cmpe275.grpcCommB\tDataProtoP\x01\x62\x06proto3')
 )
 
 _STATUSCODE = _descriptor.EnumDescriptor(
@@ -48,8 +48,8 @@ _STATUSCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1006,
-  serialized_end=1060,
+  serialized_start=1093,
+  serialized_end=1147,
 )
 _sym_db.RegisterEnumDescriptor(_STATUSCODE)
 
@@ -616,6 +616,92 @@ _DATFRAGMENT = _descriptor.Descriptor(
   serialized_end=1004,
 )
 
+
+_EMPTYREQUEST = _descriptor.Descriptor(
+  name='EmptyRequest',
+  full_name='grpcComm.EmptyRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1006,
+  serialized_end=1020,
+)
+
+
+_DATERESPONSE = _descriptor.Descriptor(
+  name='DateResponse',
+  full_name='grpcComm.DateResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='dates', full_name='grpcComm.DateResponse.dates', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1022,
+  serialized_end=1068,
+)
+
+
+_DATES = _descriptor.Descriptor(
+  name='Dates',
+  full_name='grpcComm.Dates',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='date', full_name='grpcComm.Dates.date', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1070,
+  serialized_end=1091,
+)
+
 _REQUEST.fields_by_name['ping'].message_type = _PINGREQUEST
 _REQUEST.fields_by_name['putRequest'].message_type = _PUTREQUEST
 _REQUEST.fields_by_name['getRequest'].message_type = _GETREQUEST
@@ -635,6 +721,7 @@ _PUTREQUEST.fields_by_name['metaData'].message_type = _METADATA
 _PUTREQUEST.fields_by_name['datFragment'].message_type = _DATFRAGMENT
 _GETREQUEST.fields_by_name['metaData'].message_type = _METADATA
 _GETREQUEST.fields_by_name['queryParams'].message_type = _QUERYPARAMS
+_DATERESPONSE.fields_by_name['dates'].message_type = _DATES
 DESCRIPTOR.message_types_by_name['LeaderRequest'] = _LEADERREQUEST
 DESCRIPTOR.message_types_by_name['ReadData'] = _READDATA
 DESCRIPTOR.message_types_by_name['BoolResponse'] = _BOOLRESPONSE
@@ -649,6 +736,9 @@ DESCRIPTOR.message_types_by_name['GetRequest'] = _GETREQUEST
 DESCRIPTOR.message_types_by_name['QueryParams'] = _QUERYPARAMS
 DESCRIPTOR.message_types_by_name['MetaData'] = _METADATA
 DESCRIPTOR.message_types_by_name['DatFragment'] = _DATFRAGMENT
+DESCRIPTOR.message_types_by_name['EmptyRequest'] = _EMPTYREQUEST
+DESCRIPTOR.message_types_by_name['DateResponse'] = _DATERESPONSE
+DESCRIPTOR.message_types_by_name['Dates'] = _DATES
 DESCRIPTOR.enum_types_by_name['StatusCode'] = _STATUSCODE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -750,6 +840,27 @@ DatFragment = _reflection.GeneratedProtocolMessageType('DatFragment', (_message.
   ))
 _sym_db.RegisterMessage(DatFragment)
 
+EmptyRequest = _reflection.GeneratedProtocolMessageType('EmptyRequest', (_message.Message,), dict(
+  DESCRIPTOR = _EMPTYREQUEST,
+  __module__ = 'server_pb2'
+  # @@protoc_insertion_point(class_scope:grpcComm.EmptyRequest)
+  ))
+_sym_db.RegisterMessage(EmptyRequest)
+
+DateResponse = _reflection.GeneratedProtocolMessageType('DateResponse', (_message.Message,), dict(
+  DESCRIPTOR = _DATERESPONSE,
+  __module__ = 'server_pb2'
+  # @@protoc_insertion_point(class_scope:grpcComm.DateResponse)
+  ))
+_sym_db.RegisterMessage(DateResponse)
+
+Dates = _reflection.GeneratedProtocolMessageType('Dates', (_message.Message,), dict(
+  DESCRIPTOR = _DATES,
+  __module__ = 'server_pb2'
+  # @@protoc_insertion_point(class_scope:grpcComm.Dates)
+  ))
+_sym_db.RegisterMessage(Dates)
+
 
 DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n\024com.cmpe275.grpcCommB\tDataProtoP\001'))
@@ -760,8 +871,8 @@ _COMMUNICATIONSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=1063,
-  serialized_end=1794,
+  serialized_start=1150,
+  serialized_end=2022,
   methods=[
   _descriptor.MethodDescriptor(
     name='pingInternal',
@@ -860,6 +971,24 @@ _COMMUNICATIONSERVICE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_REQUEST,
     output_type=_RESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='getUniqueDateIds',
+    full_name='grpcComm.CommunicationService.getUniqueDateIds',
+    index=11,
+    containing_service=None,
+    input_type=_EMPTYREQUEST,
+    output_type=_DATERESPONSE,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='updateBloomFilter',
+    full_name='grpcComm.CommunicationService.updateBloomFilter',
+    index=12,
+    containing_service=None,
+    input_type=_EMPTYREQUEST,
+    output_type=_BOOLRESPONSE,
     options=None,
   ),
 ])

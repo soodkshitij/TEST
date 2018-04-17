@@ -11,6 +11,7 @@ import requests
 logger = lg.get_logger()
 
 heartbeat_interval =2
+bloom_filter_interval = 5*60
 
 class Client():
     
@@ -78,7 +79,7 @@ class Client():
     
     def process(self, file):
         for x in chunktest.process(None,request=False,name=file):
-            print(self.putHandler("".join(x)))
+            (self.putHandler("".join(x)))
             
     def ping(self,data_msg):
         print ("Insid ping")
@@ -90,7 +91,15 @@ class Client():
         ))
         print(req)
         return self.stub.ping(req)
-        
+    
+    def getUniqueDateIds(self):
+        dates = self.stub.getUniqueDateIds(server_pb2.EmptyRequest())
+        return dates
+    
+    def updateBloomFilter(self):
+        return self.stub.updateBloomFilter(server_pb2.EmptyRequest())
+    
+    
         
 
 
@@ -101,8 +110,10 @@ def run():
     logger.info("Connecting to host {} on port {}".format(node_details[0], node_details[1]))
     c = Client(node_details[0],node_details[1])
     leader_node = 0
+    heart_beat_count = 0
     while(True):
         time.sleep(heartbeat_interval)
+        heart_beat_count+=1
         leader = c.getLeaderNode(node_id)
         if leader_node != leader.id and leader.id == node_id:
             if leader_node != 0:
@@ -110,6 +121,9 @@ def run():
             requests.get("http://cmpe275-spring-18.mybluemix.net/put/"+config.get_node_details(leader.id)[0])
             leader_node = leader.id
             logger.info("Publish node_id {} to external cluster".format(node_id))
+            if heart_beat_count*heartbeat_interval==bloom_filter_interval:
+                c.updateBloomFilter()
+                
 
 
 

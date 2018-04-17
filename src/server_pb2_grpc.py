@@ -69,6 +69,16 @@ class CommunicationServiceStub(object):
         request_serializer=server__pb2.Request.SerializeToString,
         response_deserializer=server__pb2.Response.FromString,
         )
+    self.getUniqueDateIds = channel.unary_unary(
+        '/grpcComm.CommunicationService/getUniqueDateIds',
+        request_serializer=server__pb2.EmptyRequest.SerializeToString,
+        response_deserializer=server__pb2.DateResponse.FromString,
+        )
+    self.updateBloomFilter = channel.unary_unary(
+        '/grpcComm.CommunicationService/updateBloomFilter',
+        request_serializer=server__pb2.EmptyRequest.SerializeToString,
+        response_deserializer=server__pb2.BoolResponse.FromString,
+        )
 
 
 class CommunicationServiceServicer(object):
@@ -152,6 +162,20 @@ class CommunicationServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def getUniqueDateIds(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def updateBloomFilter(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_CommunicationServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -209,6 +233,16 @@ def add_CommunicationServiceServicer_to_server(servicer, server):
           servicer.ping,
           request_deserializer=server__pb2.Request.FromString,
           response_serializer=server__pb2.Response.SerializeToString,
+      ),
+      'getUniqueDateIds': grpc.unary_unary_rpc_method_handler(
+          servicer.getUniqueDateIds,
+          request_deserializer=server__pb2.EmptyRequest.FromString,
+          response_serializer=server__pb2.DateResponse.SerializeToString,
+      ),
+      'updateBloomFilter': grpc.unary_unary_rpc_method_handler(
+          servicer.updateBloomFilter,
+          request_deserializer=server__pb2.EmptyRequest.FromString,
+          response_serializer=server__pb2.BoolResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

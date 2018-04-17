@@ -13,7 +13,7 @@ class CreateBloomFilter():
         self.bloomf = BloomFilter(self.n,self.p)
         for item in self.word_present:
             print(item)
-            self.bloomf.add(bytes(to_integer(datetime.datetime.strptime(item,'%Y-%m-%d'))))
+            self.bloomf.add(bytes(to_integer(datetime.datetime.strptime(item,'%Y%m%d'))))
     
     def createfilter(self, cnt, word_present):
         self.p = 0.05 #false positive probability
@@ -22,13 +22,17 @@ class CreateBloomFilter():
             self.bloomf.add(bytes(to_integer(item)))
     
     def testdate(self, todate):
+        todate = datetime.datetime.strptime(todate,'%Y%m%d')
         todate = to_integer(todate)
         if self.bloomf.check(bytes(todate)):
             return 1
         else:
             return 0
+        
+        
+
     
     
-
-
+c = CreateBloomFilter(2,['20120101','20120102','20120102'])
+print(c.testdate('20120102'))
         
