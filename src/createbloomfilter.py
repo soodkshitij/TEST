@@ -33,6 +33,6 @@ class CreateBloomFilter():
 
     
     
-c = CreateBloomFilter(2,['20120101','20120102','20120102'])
-print(c.testdate('20120102'))
+# c = CreateBloomFilter(2,['20120101','20120102','20120102'])
+# print(c.testdate('20120102'))
         
