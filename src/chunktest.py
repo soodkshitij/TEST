@@ -28,6 +28,6 @@ def process(file_obj, request = True, name=""):
         
         
 if __name__ == '__main__':
-    f =  open("data/meso.out")
-    for x in process(None, request=False, name = "data/meso.out"):
+    f =  open("data/mesowest.out")
+    for x in process(None, request=False, name = "data/mesowest.out"):
         print ("".join(x))
