@@ -1,5 +1,5 @@
 import uuid
-
+import datetime
 
 def process(file_obj, request = True, name=""):
     if request:
@@ -11,12 +11,14 @@ def process(file_obj, request = True, name=""):
         data = []
         for line in f:
             #print line.strip().split()
-            if len(line.strip().split())>0 and (line.strip().split())[0] == "STN":
+            if len(line.strip().split())>10 and (line.strip().split())[0] == "STN":
                 process = True
                 continue
             
             if process:
-                data.append(line)
+                tempLine = line.strip().split()
+                tempLine[1] = datetime.datetime.strptime(tempLine[1], '%Y%m%d/%H%M').strftime('%Y-%m-%d %H:%M:%S')
+                data.append(','.join(tempLine))
                 
             if len(data) ==chunk_size:
                 print ("Yielding data ",len(data))
@@ -28,6 +30,5 @@ def process(file_obj, request = True, name=""):
         
         
 if __name__ == '__main__':
-    f =  open("data/mesowest.out")
     for x in process(None, request=False, name = "data/mesowest.out"):
         print ("".join(x))
