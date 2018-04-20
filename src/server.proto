@@ -88,6 +88,17 @@ enum StatusCode {
  EOF=3;
 }
 
+message EmptyRequest{
+}
+
+message DateResponse{
+	repeated Dates dates = 1;
+}
+
+message Dates {
+    string date = 1;
+  }
+
 service CommunicationService {
    rpc pingInternal(LeaderRequest) returns(BoolResponse) {}
    rpc getClientStatus(ReplicationRequest) returns(ClientResponse) {}
@@ -101,4 +112,6 @@ service CommunicationService {
    rpc GetFromLocalCluster(Request) returns (stream Response);
    rpc PutToLocalCluster(stream Request) returns (Response);
    rpc ping(Request) returns (Response);
+   rpc getUniqueDateIds(EmptyRequest) returns (DateResponse) {};
+   rpc updateBloomFilter(EmptyRequest) returns (BoolResponse){}
 }
