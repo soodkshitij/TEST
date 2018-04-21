@@ -7,8 +7,11 @@ import logger as lg
 import time
 import chunktest
 import requests
-import pylibmc
-mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})
+import pylibmc #for mac
+#import memcache   #for windows
+
+mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})  #for mac
+#mc = memcache.Client(['127.0.0.1:11211'], debug=0)   #for windows
 
 logger = lg.get_logger()
 
@@ -39,12 +42,10 @@ class Client():
         return self.stub.getLeaderNode(server_pb2.ReplicationRequest(id=node_id))
     
     def getHandler(self, from_timestamp, to_timestamp):
-        cache_key = str(from_timestamp) + str(to_timestamp)
-        if cache_key in mc:
-            print("here")
-            print(cache_key)
+        cache_key = str(from_timestamp).replace(" ","") + str(to_timestamp).replace(" ","")
+        if mc.get(cache_key):
+            print("in cache"+cache_key)
             value = mc.get(cache_key)
-            #print(value)
             yield value.datFragment
         else:
             req = server_pb2.Request(
