@@ -7,7 +7,7 @@ def to_integer(dt_time):
 
 class CreateBloomFilter():
     def __init__(self,cnt, word_present):
-        self.n = cnt
+        self.n = 1000000
         self.word_present = word_present #no of items to add
         self.p = 0.05 #false positive probability
         self.bloomf = BloomFilter(self.n,self.p)
