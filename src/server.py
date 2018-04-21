@@ -10,31 +10,24 @@ import mongoTestNew
 from utils import getEpochTime
 import config
 from client import Client
-
-#aastha's import
+import json
 from threading import Thread
 from queue import Queue
 from createbloomfilter import CreateBloomFilter
 import requests
 import time
 import datetime
+
 q = Queue(maxsize=0)
-
 dqueue = []
-
-
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 encoding = "UTF-8"
-
 server_port = None
 node_id = None
 space = None
 logger = None
 
 class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
-    '''
-    '''
-    
     def __init__(self):
         self.node = Server(node_id)
         self.node.connect_neighbours()
@@ -62,24 +55,20 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         return server_pb2.ReplicationRequest(id=leader_node)
     
     def getHandler(self, request, context):
-        print(request.getRequest.queryParams)
         print(request)
         #checking bloomfilter
         d = int(time.mktime(time.strptime(request.getRequest.queryParams.from_utc, '%Y-%m-%d %H:%M:%S')))
         toDate = int(time.mktime(time.strptime(request.getRequest.queryParams.to_utc, '%Y-%m-%d %H:%M:%S')))
         process_internal = False
+
         while d <= toDate:
             date_to_check = (datetime.datetime.fromtimestamp(d).strftime('%Y%m%d'))
             c = self.node.bloomfilter
-            print ("checking bloom filter ",date_to_check)
             if c.testdate(date_to_check):
-                print ("blloom filter said yes")
+                print ("bloom filter said yes")
                 process_internal = True
                 break
             d += (24*60*60)
-        
-        
-        
         
         if process_internal:
             serverlist=self.node.get_active_node_ids()
@@ -99,29 +88,31 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                         print("incrementing null count")
                         null_count+=1
                         continue
-                    yield(d)
+                    if request.fromSender =="prof":
+                        yield(provideJson(d))
+                    else:
+                        yield(d)
                 
                 if null_count==len(serverlist):
-                    print ("Breaking null check")
-                    print ("null_count",null_count)
-                    print ("server list",serverlist)
+                    print ("Breaking null check with null_count",null_count)
                     break
         else:
-             if request.fromSender =="prof":
-                 external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
-                 external_hosts = external_hosts.split(",")
-                 request.fromSender = ""
-                 leader_details = config.get_node_details(self.node.leader_id)
-                 return_queue_external = Queue(maxsize=0)
-                 for host_details in external_hosts:
-                     if host_details==leader_details[0]:
-                         continue
-                     print("Connecting to host",host_details)
-                     assign_to_node = (Thread(target=self.connect_to_external_node, args =(host_details,request,return_queue_external,)))
-                     assign_to_node.setDaemon(True)
-                     assign_to_node.start()
-                 null_count = 0
-                 while(True):
+            print ("bloom filter said no")
+            if request.fromSender =="prof":
+                external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
+                external_hosts = external_hosts.split(",")
+                request.fromSender = ""
+                leader_details = config.get_node_details(self.node.leader_id)
+                return_queue_external = Queue(maxsize=0)
+                for host_details in external_hosts:
+                    if host_details==leader_details[0]:
+                        continue
+                    print("Connecting to host",host_details)
+                    assign_to_node = (Thread(target=self.connect_to_external_node, args =(host_details,request,return_queue_external,)))
+                    assign_to_node.setDaemon(True)
+                    assign_to_node.start()
+                null_count = 0
+                while(True):
                     if (return_queue_external.qsize()):
                         print("queue data ",return_queue_external.qsize())
                         d = return_queue_external.get()
@@ -129,48 +120,33 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                             print("incrementing null count")
                             null_count+=1
                             continue
-                        yield(d)
+                        yield(provideJson(d))
                     
                     if null_count==len(external_hosts)-1:
-                        print ("Breaking null check")
-                        print ("null_count",null_count)
-                        print ("server list",external_hosts)
-                        break        
-                    
-                     
-                     
-    
+                        print ("Breaking null check with null_count",null_count)
+                        break
                
     def connect_to_external_node(self, host_details,request,return_queue):
         try:
             client = Client(host=host_details,port=8080)
             print("at..." + str(host_details))
             print("Inside connect_to_node",request.getRequest.queryParams)
-            #fromTimestamp = getEpochTime(request.getRequest.queryParams.from_utc)
-            #toTimestamp = getEpochTime(request.getRequest.queryParams.to_utc)
             stream = client.getHandler(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
             for res in stream:
-                print ("inserting into queue")
                 if res.datFragment.data:
-                    print(res.datFragment.data)
-                    print("yes data")
+                    print("yes external node data ",res.datFragment.data)
                     return_queue.put(res)
                 else:
-                    print (res.datFragment.data)
-                    print ("no data")
+                    print ("no external node data ",res.datFragment.data)
         finally:
             return_queue.put(None)
-    
-    
             
     def connect_to_node(self, node_id,request,return_queue):
-#         channel = grpc.insecure_channel(hostdetails)
-#         stub = request_pb2_grpc.CommunicationServiceStub(channel)
+        #channel = grpc.insecure_channel(hostdetails)
+        #stub = request_pb2_grpc.CommunicationServiceStub(channel)
         client = self.node.get_client(node_id)
         print("at..." + str(node_id))
         print("Inside connect_to_node",request.getRequest.queryParams)
-        #fromTimestamp = getEpochTime(request.getRequest.queryParams.from_utc)
-        #toTimestamp = getEpochTime(request.getRequest.queryParams.to_utc)
         stream = client.GetFromLocalCluster(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
         for res in stream:
             print ("inserting into queue")
@@ -181,19 +157,13 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
             else:
                 print (res.datFragment.data)
                 print ("no data")
-        return_queue.put(None)
-        #print ("data count from "+str(node_id)+" is "+str(return_queue.qsize()))
-    
+        return_queue.put(None)    
         
     def GetFromLocalCluster(self, request, context):
-        print("Inside GetFromLocalCluster")
-        print((request.getRequest.queryParams))
+        print("Inside GetFromLocalCluster", request.getRequest.queryParams)
         
         fromTimestamp = getEpochTime(request.getRequest.queryParams.from_utc)
         toTimestamp = getEpochTime(request.getRequest.queryParams.to_utc)
-        
-        
-        #fromTimestamp, toTimestamp = 1328114400000, 1328155200000
         data_count = mongoTestNew.get_count_of_data(fromTimestamp, toTimestamp)
         print("Data count is",data_count)
         #TODO Move to config
@@ -217,20 +187,17 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         res = client.PutToLocalCluster((req.putRequest.datFragment.data).decode('utf-8'))
         if res.code!=1:
             return False
-        return True
-            
+        return True            
             
     def putHandler(self, request_iterator, context):
         serverlist=self.node.get_active_node_ids_for_push()
         print ("serverlist ",serverlist)
-        print("Inside put handler")
-        
+        print("Inside put handler")        
         st_idx = 0
         
         for req in request_iterator:
                 if not serverlist:
-                    return server_pb2.Response(code=2)
-            
+                    return server_pb2.Response(code=2)            
                 node_id = serverlist[st_idx]
                 while(True):
                     if self.pushDataToNode(req, node_id):
@@ -253,10 +220,8 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
             if(mongoTestNew.get_mongo_connection().mesowest.command("dbstats")["dataSize"] > space):
                 print ("Inside PutToLocalCluster returening node full")
                 return server_pb2.Response(code=2)
-            # mongoTestNew.put_data((req.putRequest.datFragment.data).decode('utf-8'),  )
             mongoTestNew.put_data(req.putRequest.datFragment)
-        return server_pb2.Response(code=1)
-    
+        return server_pb2.Response(code=1)    
     
     def ping(self,req, context):
         print ("Inside server ping")
@@ -270,7 +235,6 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         for d in data:
             d_t = dates.dates.add()
             d_t.date = d
-        #extend
         return dates
     
     def updateBloomFilter(self, request, context):
@@ -287,9 +251,6 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         c = CreateBloomFilter(len(dates_set),dates_set)
         self.node.bloomfilter = c
         return server_pb2.BoolResponse(result=True)
-                
-        
-    
 
 def run(host, port, node):
     global server_port
@@ -309,6 +270,35 @@ def run(host, port, node):
             time.sleep(_ONE_DAY_IN_SECONDS)
     except KeyboardInterrupt:
         server.stop(0)
+
+def provideJson(chunk):
+    jsonChunk = []
+    for dline in (chunk.datFragment.data).decode('utf-8').strip('\n').split('\n'):
+        dlineValues = dline.replace('"',"'").split(',')
+        dlineJsonValues = {
+            'STN':dlineValues[0],
+            'TIMESTAMP':dlineValues[1],
+            'MNET':dlineValues[2],
+            'SLAT':dlineValues[3],
+            'SLON':dlineValues[4],
+            'SELV':dlineValues[5],
+            'TMPF':dlineValues[6],
+            'SKNT':dlineValues[7],
+            'DRCT':dlineValues[8],
+            'GUST':dlineValues[9],
+            'PMSL':dlineValues[10],
+            'ALTI':dlineValues[11],
+            'DWPF':dlineValues[12],
+            'RELH':dlineValues[13],
+            'WTHR':dlineValues[14],
+            'P24I':dlineValues[15]
+        }
+        jsonChunk.append(json.dumps(dlineJsonValues))
+    responseChunk = server_pb2.Response(code=1, msg="froms-1",
+                                       metaData = server_pb2.MetaData(uuid="",numOfFragment=int(chunk.metaData.numOfFragment)),
+                                       datFragment = server_pb2.DatFragment(timestamp_utc="",data=str((',').join(jsonChunk)).encode(encoding='utf_8'))
+                                       )
+    return responseChunk
         
 
 if __name__ == '__main__':

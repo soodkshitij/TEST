@@ -7,11 +7,11 @@ import logger as lg
 import time
 import chunktest
 import requests
-import pylibmc #for mac
-#import memcache   #for windows
+#import pylibmc #for mac
+import memcache   #for windows
 
-mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})  #for mac
-#mc = memcache.Client(['127.0.0.1:11211'], debug=0)   #for windows
+#mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})  #for mac
+mc = memcache.Client(['127.0.0.1:11211'], debug=0)   #for windows
 
 logger = lg.get_logger()
 
@@ -49,7 +49,7 @@ class Client():
             yield value.datFragment
         else:
             req = server_pb2.Request(
-                fromSender='prof',
+                fromSender='some put sender',
                 toReceiver='some put receiver',
             getRequest=server_pb2.GetRequest(
               metaData=server_pb2.MetaData(uuid='14829'),
