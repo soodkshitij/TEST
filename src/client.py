@@ -7,6 +7,8 @@ import logger as lg
 import time
 import chunktest
 import requests
+import pylibmc
+mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})
 
 logger = lg.get_logger()
 
@@ -37,15 +39,24 @@ class Client():
         return self.stub.getLeaderNode(server_pb2.ReplicationRequest(id=node_id))
     
     def getHandler(self, from_timestamp, to_timestamp):
-        req = server_pb2.Request(
-            fromSender='prof',
-            toReceiver='some put receiver',
-        getRequest=server_pb2.GetRequest(
-          metaData=server_pb2.MetaData(uuid='14829'),
-          queryParams=server_pb2.QueryParams(from_utc=from_timestamp,to_utc=to_timestamp))
-        )
-        for stream in self.stub.getHandler(req):
-            yield(stream)
+        cache_key = str(from_timestamp) + str(to_timestamp)
+        if cache_key in mc:
+            print("here")
+            print(cache_key)
+            value = mc.get(cache_key)
+            #print(value)
+            yield value.datFragment
+        else:
+            req = server_pb2.Request(
+                fromSender='prof',
+                toReceiver='some put receiver',
+            getRequest=server_pb2.GetRequest(
+              metaData=server_pb2.MetaData(uuid='14829'),
+              queryParams=server_pb2.QueryParams(from_utc=from_timestamp,to_utc=to_timestamp))
+            )
+            for stream in self.stub.getHandler(req):
+                mc.set(cache_key,stream)
+                yield(stream)
             
     def GetFromLocalCluster(self, from_timestamp, to_timestamp):
         req = server_pb2.Request(
