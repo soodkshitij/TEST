@@ -250,10 +250,11 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
     
     def PutToLocalCluster(self, request_iterator, context):
         for req in request_iterator:
-            if(mongoTestNew.get_mongo_connection().mesowest.command("dbstats")["dataSize"]>space):
+            if(mongoTestNew.get_mongo_connection().mesowest.command("dbstats")["dataSize"] > space):
                 print ("Inside PutToLocalCluster returening node full")
                 return server_pb2.Response(code=2)
-            mongoTestNew.put_data((req.putRequest.datFragment.data).decode('utf-8'))
+            # mongoTestNew.put_data((req.putRequest.datFragment.data).decode('utf-8'),  )
+            mongoTestNew.put_data(req.putRequest.datFragment)
         return server_pb2.Response(code=1)
     
     
