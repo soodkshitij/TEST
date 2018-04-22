@@ -24,9 +24,9 @@ list_of_files = glob.glob('./data/*')
 for file_name in list_of_files:
 	if file_name.endswith('.out'):
 		# mesowest format ending with .out
-		c.process(open(file_name))
+		c.process(file_name)
 	elif '_' in file_name and file_name.endswith('.csv'):
 		# Assuming Mesonet has <date>_<time> format
-		c.process(open(file_name))
+		c.process(file_name)
 	else:
 		print("Nothing do for this file")
