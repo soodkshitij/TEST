@@ -164,14 +164,14 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         
         fromTimestamp = getEpochTime(request.getRequest.queryParams.from_utc)
         toTimestamp = getEpochTime(request.getRequest.queryParams.to_utc)
-        data_count = mongoTestNew.get_count_of_data(fromTimestamp, toTimestamp)
+        data_count = mongoTestNew.get_count_of_data(fromTimestamp, toTimestamp, request.getRequest.queryParams.params_json)
         print("Data count is",data_count)
         #TODO Move to config
         offset = 0 
         limit = 2000
         yield_count = 1
         while(offset<=data_count):
-            query_data = mongoTestNew.get_data(fromTimestamp, toTimestamp, offset, limit)
+            query_data = mongoTestNew.get_data(fromTimestamp, toTimestamp, offset, limit, request.getRequest.queryParams.params_json)
             response = server_pb2.Response(code=1, msg="froms-1",
                                        metaData = server_pb2.MetaData(uuid="",numOfFragment=int(data_count)),
                                        datFragment = server_pb2.DatFragment(timestamp_utc="",data=str(query_data).encode(encoding='utf_8'))
