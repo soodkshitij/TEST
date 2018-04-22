@@ -20,45 +20,66 @@ def get_mongo_connection(host='localhost', port=27017):
             return None
     return con
 
-def get_count_of_data(fromTS, toTS):
-    return get_mongo_connection().mesowest.mesowest.find({ "timestamp_utc" : { "$gt" :  fromTS, "$lt" : toTS}}).count()
+def get_count_of_data(fromTS, toTS, params_json):
+    return get_mongo_connection().mesowest.mesowest.find(parseParams(fromTS, toTS, params_json)).count()
 
 def get_dates():
     return get_mongo_connection().mesowest.mesowest.distinct("date_utc")
 
-def get_data(fromTS, toTS, offset, limit):
+def get_data(fromTS, toTS, offset, limit, params_json):
     content= ""
     if offset or limit:
-        data =  list(get_mongo_connection().mesowest.mesowest
-                     .find({ "timestamp_utc" : { "$gt" : fromTS, "$lt" : toTS}}).skip(offset).limit(limit))
+        data =  list(get_mongo_connection().mesowest.mesowest.find(parseParams(fromTS, toTS, params_json)).skip(offset).limit(limit))
     else:
-        data =  list(get_mongo_connection().mesowest.mesowest
-                     .find({ "timestamp_utc" : { "$gt" :  fromTS, "$lt" : toTS}}))
+        data =  list(get_mongo_connection().mesowest.mesowest.find(parseParams(fromTS, toTS, params_json)))
     for d in data:
         content+=d['STN']+','+d['YYMMDD/HHMM']+','+d['MNET']+','+d['SLAT']+','+d['SLON']+','+d['SELV']+','\
                  +d['TMPF']+','+d['SKNT']+','+d['DRCT']+','+d['GUST']+','+d['PMSL']+','+d['ALTI']+','\
                  +d['DWPF']+','+d['RELH']+','+d['WTHR']+','+d['P24I']+'\n'
     return content
 
+def parseParams(fromTS, toTS, params_json):
+    query = {}
+    if fromTS and toTS:
+        query['timestamp_utc'] = {'$gte': fromTS, "$lt" : toTS}
+    elif fromTS:
+        query['timestamp_utc'] = {'$gte': fromTS}
+    elif toTS:
+        query['timestamp_utc'] = {"$lt" : toTS}
+
+    if params_json:
+        for singleParam in params_json:
+            if singleParam['op']=='eq':
+                if isinstance(singleParam['rhs'], list): 
+                    query[singleParam['lhs']] = {'$in': singleParam['rhs']}
+                else:
+                    query[singleParam['lhs']] = singleParam['rhs']
+            elif singleParam['op']=='gt':
+                query[singleParam['lhs']] = {'$gte': singleParam['rhs']}
+            elif singleParam['op']=='lt':
+                query[singleParam['lhs']] = {'$lt': singleParam['rhs']}
+    print(query)
+    return query
+
 def put_data(request):
     splittedArray = []
     bulkInsertArray = []
     content = (request.data).decode('utf-8')
-    # Timestamp UTC
-    timestamp = request.timestamp_utc
     for line in content.split('\n'):
         line = line.strip()
         splittedArray =  line.split(',')
         if len(splittedArray) > MESOWEST_MIN_ROW_SIZE and splittedArray[0] != "STN":
-            doc =  {'STN':splittedArray[0],'YYMMDD/HHMM':splittedArray[1],'MNET':splittedArray[2],'SLAT':splittedArray[3],
-                    'SLON':splittedArray[4],'SELV':splittedArray[5],'TMPF':splittedArray[6],'SKNT':splittedArray[7],
-                    'DRCT':splittedArray[8],'GUST':splittedArray[9],'PMSL':splittedArray[10],'ALTI':splittedArray[11],
-                    'DWPF':splittedArray[12],'RELH':splittedArray[13],'WTHR':splittedArray[14],'P24I':splittedArray[14],
+            doc =  {'STN':splittedArray[0],'YYMMDD/HHMM':splittedArray[1],'MNET':float(splittedArray[2]),'SLAT':float(splittedArray[3]),
+                    'SLON':float(splittedArray[4]),'SELV':float(splittedArray[5]),'TMPF':float(splittedArray[6]),'SKNT':float(splittedArray[7]),
+                    'DRCT':float(splittedArray[8]),'GUST':float(splittedArray[9]),'PMSL':float(splittedArray[10]),'ALTI':float(splittedArray[11]),
+                    'DWPF':float(splittedArray[12]),'RELH':float(splittedArray[13]),'WTHR':float(splittedArray[14]),'P24I':float(splittedArray[14]),
                     'date_utc':(splittedArray[1].split(' '))[0].replace('-',''),'timestamp_utc':
                         int(time.mktime(time.strptime(splittedArray[1], '%Y-%m-%d %H:%M:%S')))*1000}
             bulkInsertArray.append(doc)
 
         elif len(splittedArray) == MESONET_ROW_SIZE and splittedArray[0] != "#":
+            # Timestamp UTC
+            timestamp = request.timestamp_utc
             """
                Sample data: 
                # id,name,mesonet,lat,lon,elevation,agl,cit,state,country,active
@@ -66,16 +87,28 @@ def put_data(request):
             """
             # TODO need to fix the timestamp once clear about client stream data
             # Need to get the timestamp_utc from request
-            doc =  {'STN': splittedArray[0],'YYMMDD/HHMM':timestamp ,'MNET': None,'SLAT':splittedArray[3],'SLON':splittedArray[4],
-                    'SELV': splittedArray[5],'TMPF': None,'SKNT': None,'DRCT': None,'GUST': None,'PMSL': None,'ALTI': None,
+            doc =  {'STN': splittedArray[0],'YYMMDD/HHMM':timestamp ,'MNET': None,'SLAT':float(splittedArray[3]),'SLON':float(splittedArray[4]),
+                    'SELV': float(splittedArray[5]),'TMPF': None,'SKNT': None,'DRCT': None,'GUST': None,'PMSL': None,'ALTI': None,
                     'DWPF': None,'RELH': None,'WTHR': None,'P24I': None,'date_utc':timestamp,
                     'timestamp_utc':timestamp}
             bulkInsertArray.append(doc)
 
     get_mongo_connection().mesowest.mesowest.insert_many(bulkInsertArray)
     return True
+
     
 if __name__ == '__main__':
-    print(get_count_of_data(1483228800000, 2483228800000))
-    print(get_data(1483228800000, 2483228800000,0,100))
+    params_json = [{'lhs':'TMPF','op':'eq','rhs':'-9999.00'},{'lhs':'GUST','op':'gt','rhs':'7'},{'lhs':'GUST','op':'lt','rhs':'10'},{'lhs':'STN','op':'eq','rhs':['BULLF','KCKP']}]
+    print(get_count_of_data(1483228800000, 2483228800000, {}))
+    print(get_data(1483228800000, 2483228800000, 0, 100, params_json))
     print(get_dates())
+
+    '''
+    class Req():
+        def __init__(self):
+            pass
+    request= Req()
+    request.data="BULLF,2018-03-16 21:45:00,8.00,37.52,-110.73,1128.00,-9999.00,6.33,-9999.00,8.26,-9999.00,-9999.00,-9999.00,-9999.00,-9999.00,-9999.00\nBULLF,2012-02-01 18:15:00,8.00,37.52,-110.73,1128.00,41.00,1.62,168.80,2.86,-9999.00,-9999.00,-90.26,0.07,-9999.00,-9999.00\nBULLF,2012-02-01 18:30:00,8.00,37.52,-110.73,1128.00,41.55,1.23,151.10,2.70,-9999.00,-9999.00,-89.99,0.07,-9999.00,-9999.00\nBULLF,2012-02-01 18:45:00,8.00,37.52,-110.73,1128.00,41.96,1.88,161.00,5.10,-9999.00,-9999.00,-89.79,0.07,-9999.00,-9999.00"
+    request.data = request.data.encode("utf-8")
+    put_data(request)
+    '''
