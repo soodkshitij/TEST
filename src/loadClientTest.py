@@ -1,6 +1,8 @@
 import glob
 import gzip
 import shutil
+import re
+
 from chunktest import process
 from config import get_client_map, get_node_details, populate
 from client import Client
@@ -17,7 +19,14 @@ for file_name in list_of_files:
 		with open(file_name[:-3], 'wb') as f_out:
 			shutil.copyfileobj(f_in, f_out)
 
-list_of_files = glob.glob('./data/*.out')
+# Mesonet CDFNet file format for now just imagine that the parser did its job and we have CSV format
+list_of_files = glob.glob('./data/*')
 for file_name in list_of_files:
-	f = open(file_name)
-	c.process(file_name)
+	if file_name.endswith('.out'):
+		# mesowest format ending with .out
+		c.process(open(file_name))
+	elif '_' in file_name and file_name.endswith('.csv'):
+		# Assuming Mesonet has <date>_<time> format
+		c.process(open(file_name))
+	else:
+		print("Nothing do for this file")
