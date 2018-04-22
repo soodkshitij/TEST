@@ -33,9 +33,9 @@ def get_data(fromTS, toTS, offset, limit, params_json):
     else:
         data =  list(get_mongo_connection().mesowest.mesowest.find(parseParams(fromTS, toTS, params_json)))
     for d in data:
-        content+=d['STN']+','+d['YYMMDD/HHMM']+','+d['MNET']+','+d['SLAT']+','+d['SLON']+','+d['SELV']+','\
-                 +d['TMPF']+','+d['SKNT']+','+d['DRCT']+','+d['GUST']+','+d['PMSL']+','+d['ALTI']+','\
-                 +d['DWPF']+','+d['RELH']+','+d['WTHR']+','+d['P24I']+'\n'
+        content+=d['STN']+','+d['YYMMDD/HHMM']+','+str(d['MNET'])+','+str(d['SLAT'])+','+str(d['SLON'])+','+str(d['SELV'])+','\
+                 +str(d['TMPF'])+','+str(d['SKNT'])+','+str(d['DRCT'])+','+str(d['GUST'])+','+str(d['PMSL'])+','+str(d['ALTI'])+','\
+                 +str(d['DWPF'])+','+str(d['RELH'])+','+str(d['WTHR'])+','+str(d['P24I'])+'\n'
     return content
 
 def parseParams(fromTS, toTS, params_json):
