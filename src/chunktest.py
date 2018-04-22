@@ -18,7 +18,7 @@ def process(file_obj, request = True, name=""):
             if process:
                 tempLine = line.strip().split()
                 tempLine[1] = datetime.datetime.strptime(tempLine[1], '%Y%m%d/%H%M').strftime('%Y-%m-%d %H:%M:%S')
-                data.append(','.join(tempLine))
+                data.append(','.join(tempLine)+"\n")
                 
             if len(data) ==chunk_size:
                 print ("Yielding data ",len(data))
@@ -28,7 +28,3 @@ def process(file_obj, request = True, name=""):
         print ("Yielding data ",len(data))
         yield(data)
         
-        
-if __name__ == '__main__':
-    for x in process(None, request=False, name = "data/mesowest.out"):
-        print ("".join(x))

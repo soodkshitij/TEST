@@ -7,11 +7,11 @@ import logger as lg
 import time
 import chunktest
 import requests
-#import pylibmc #for mac
-import memcache   #for windows
+import pylibmc #for mac
+#import memcache   #for windows
 
-#mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})  #for mac
-mc = memcache.Client(['127.0.0.1:11211'], debug=0)   #for windows
+mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})  #for mac
+#mc = memcache.Client(['127.0.0.1:11211'], debug=0)   #for windows
 
 logger = lg.get_logger()
 
@@ -71,22 +71,39 @@ class Client():
         for stream in self.stub.GetFromLocalCluster(req):
             yield(stream)
         
-    def putHandler(self,putData):
-        return self.stub.putHandler(self.create_streaming_request(putData))
+#     def putHandler(self,putData):
+#         return self.stub.putHandler(self.create_streaming_request(putData))
+
+    def putHandler(self,file_path):
+        print("Inside put handler for ",file_path)
+        return self.stub.putHandler(self.create_streaming_request(file_path))
     
-    def create_streaming_request(self,putData):
+    def create_streaming_request(self,file):
+        print("create_streaming_request ",file)
+        for x in chunktest.process(None,request=False,name=file):
+            req = server_pb2.Request(
+                fromSender='some put sender',
+                toReceiver='some put receiver',
+            putRequest=server_pb2.PutRequest(
+              metaData=server_pb2.MetaData(uuid='14829'),
+              datFragment=server_pb2.DatFragment(data= str("".join(x)).encode(encoding='utf_8'))
+            ))
+            yield req
+            
+    def create_streaming_request_for_local_put(self, data):
         req = server_pb2.Request(
             fromSender='some put sender',
             toReceiver='some put receiver',
         putRequest=server_pb2.PutRequest(
           metaData=server_pb2.MetaData(uuid='14829'),
-          datFragment=server_pb2.DatFragment(data= str(putData).encode(encoding='utf_8'))
+          datFragment=server_pb2.DatFragment(data= str(data).encode(encoding='utf_8'))
         ))
         yield req
+        
     
     def PutToLocalCluster(self, putData):
         print("inside put to local cluster")
-        return self.stub.PutToLocalCluster(self.create_streaming_request(putData))
+        return self.stub.PutToLocalCluster(self.create_streaming_request_for_local_put(putData))
     
     
     def process(self, file):

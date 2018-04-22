@@ -182,11 +182,13 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
             offset = offset+limit
             
     def pushDataToNode(self,req,node_id):
-        print ("Pusing data to ",node_id)
+        print ("Pushing data to ",node_id)
         client = self.node.get_client(node_id)
         res = client.PutToLocalCluster((req.putRequest.datFragment.data).decode('utf-8'))
         if res.code!=1:
+            print("returning false")
             return False
+        print("returning true")
         return True            
             
     def putHandler(self, request_iterator, context):
@@ -196,13 +198,23 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         st_idx = 0
         
         for req in request_iterator:
+                
+                #temp code
+                l_data = (req.putRequest.datFragment.data).decode("utf-8")
+                print (l_data)
+                print ("length of data is ",len(l_data.split('\n')))
+                
+                
                 if not serverlist:
-                    return server_pb2.Response(code=2)            
+                    return server_pb2.Response(code=2)
+                print ("st_idx before node",st_idx)
                 node_id = serverlist[st_idx]
                 while(True):
                     if self.pushDataToNode(req, node_id):
                         st_idx=st_idx+1
+                        print("increm,enting st_idx",st_idx)
                         if st_idx > len(serverlist)-1:
+                            print("chanhing st_idx to 0",st_idx)
                             st_idx=0
                         break
                     else:

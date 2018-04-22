@@ -11,7 +11,9 @@ import server_pb2_grpc
 from server_pb2 import Request, PutRequest, QueryParams, DatFragment
 
 populate()
-c = Client('127.0.0.1',3000)
+node_details = get_node_details(1)
+print(node_details)
+c = Client(node_details[0],node_details[1])
 
 list_of_files = glob.glob('./data/*.gz')
 for file_name in list_of_files:
@@ -22,11 +24,12 @@ for file_name in list_of_files:
 # Mesonet CDFNet file format for now just imagine that the parser did its job and we have CSV format
 list_of_files = glob.glob('./data/*')
 for file_name in list_of_files:
+	print ("file_name",file_name)
 	if file_name.endswith('.out'):
 		# mesowest format ending with .out
-		c.process(file_name)
+		c.putHandler(file_name)
 	elif '_' in file_name and file_name.endswith('.csv'):
 		# Assuming Mesonet has <date>_<time> format
-		c.process(file_name)
+		c.putHandler(file_name)
 	else:
 		print("Nothing do for this file")

@@ -65,17 +65,24 @@ def put_data(request):
     splittedArray = []
     bulkInsertArray = []
     content = (request.data).decode('utf-8')
+    print ("Inside mongo******")
     for line in content.split('\n'):
         line = line.strip()
         splittedArray =  line.split(',')
         if len(splittedArray) > MESOWEST_MIN_ROW_SIZE and splittedArray[0] != "STN":
-            doc =  {'STN':splittedArray[0],'YYMMDD/HHMM':splittedArray[1],'MNET':float(splittedArray[2]),'SLAT':float(splittedArray[3]),
-                    'SLON':float(splittedArray[4]),'SELV':float(splittedArray[5]),'TMPF':float(splittedArray[6]),'SKNT':float(splittedArray[7]),
-                    'DRCT':float(splittedArray[8]),'GUST':float(splittedArray[9]),'PMSL':float(splittedArray[10]),'ALTI':float(splittedArray[11]),
-                    'DWPF':float(splittedArray[12]),'RELH':float(splittedArray[13]),'WTHR':float(splittedArray[14]),'P24I':float(splittedArray[14]),
-                    'date_utc':(splittedArray[1].split(' '))[0].replace('-',''),'timestamp_utc':
-                        int(time.mktime(time.strptime(splittedArray[1], '%Y-%m-%d %H:%M:%S')))*1000}
-            bulkInsertArray.append(doc)
+            try:
+                doc =  {'STN':splittedArray[0],'YYMMDD/HHMM':splittedArray[1],'MNET':float(splittedArray[2]),'SLAT':float(splittedArray[3]),
+                        'SLON':float(splittedArray[4]),'SELV':float(splittedArray[5]),'TMPF':float(splittedArray[6]),'SKNT':float(splittedArray[7]),
+                        'DRCT':float(splittedArray[8]),'GUST':float(splittedArray[9]),'PMSL':float(splittedArray[10]),'ALTI':float(splittedArray[11]),
+                        'DWPF':float(splittedArray[12]),'RELH':float(splittedArray[13]),'WTHR':float(splittedArray[14]),'P24I':float(splittedArray[14]),
+                        'date_utc':(splittedArray[1].split(' '))[0].replace('-',''),'timestamp_utc':
+                            int(time.mktime(time.strptime(splittedArray[1], '%Y-%m-%d %H:%M:%S')))*1000}
+                bulkInsertArray.append(doc)
+            except:
+                print("Exception while inserting to mongo")
+                pass
+                
+            
 
         elif len(splittedArray) == MESONET_ROW_SIZE and splittedArray[0] != "#":
             # Timestamp UTC
