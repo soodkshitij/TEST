@@ -69,7 +69,9 @@ def put_data(request):
     for line in content.split('\n'):
         line = line.strip()
         splittedArray =  line.split(',')
-        if len(splittedArray) > MESOWEST_MIN_ROW_SIZE and splittedArray[0] != "STN":
+        print (type(line))
+        #if len(splittedArray) > MESOWEST_MIN_ROW_SIZE and splittedArray[0] != "STN":
+        if 'NULL' not in line:
             try:
                 doc =  {'STN':splittedArray[0],'YYMMDD/HHMM':splittedArray[1],'MNET':float(splittedArray[2]),'SLAT':float(splittedArray[3]),
                         'SLON':float(splittedArray[4]),'SELV':float(splittedArray[5]),'TMPF':float(splittedArray[6]),'SKNT':float(splittedArray[7]),
@@ -84,20 +86,21 @@ def put_data(request):
                 
             
 
-        elif len(splittedArray) == MESONET_ROW_SIZE and splittedArray[0] != "#":
+        else:
             # Timestamp UTC
-            timestamp = request.timestamp_utc
+            #timestamp = splittedArray[1]
             """
                Sample data: 
                # id,name,mesonet,lat,lon,elevation,agl,cit,state,country,active
-               UI UC,Urbana, IL,gpsmet,40.099998474121094,-88.22000122070312,264.3999938964844,-9999.0,null,null,null,true
+               #UI UC,Urbana, IL,gpsmet,40.099998474121094,-88.22000122070312,264.3999938964844,-9999.0,null,null,null,true
+               UIUC,2005-06-21 08:00:00,NULL,gpsmet,40.099998474121094,-88.22000122070312,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
             """
             # TODO need to fix the timestamp once clear about client stream data
             # Need to get the timestamp_utc from request
-            doc =  {'STN': splittedArray[0],'YYMMDD/HHMM':timestamp ,'MNET': None,'SLAT':float(splittedArray[3]),'SLON':float(splittedArray[4]),
+            doc =  {'STN': splittedArray[0],'YYMMDD/HHMM':splittedArray[1] ,'MNET': None,'SLAT':float(splittedArray[3]),'SLON':float(splittedArray[4]),
                     'SELV': float(splittedArray[5]),'TMPF': None,'SKNT': None,'DRCT': None,'GUST': None,'PMSL': None,'ALTI': None,
-                    'DWPF': None,'RELH': None,'WTHR': None,'P24I': None,'date_utc':timestamp,
-                    'timestamp_utc':timestamp}
+                    'DWPF': None,'RELH': None,'WTHR': None,'P24I': None,'date_utc':(splittedArray[1].split(' '))[0].replace('-',''),
+                    'timestamp_utc':int(time.mktime(time.strptime(splittedArray[1], '%Y-%m-%d %H:%M:%S')))*1000}
             bulkInsertArray.append(doc)
 
     get_mongo_connection().mesowest.mesowest.insert_many(bulkInsertArray)

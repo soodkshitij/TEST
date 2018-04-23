@@ -43,7 +43,7 @@ class Client():
     
     def getHandler(self, from_timestamp, to_timestamp):
         cache_key = str(from_timestamp).replace(" ","") + str(to_timestamp).replace(" ","")
-        if mc.get(cache_key):
+        if 10>11:
             print("in cache"+cache_key)
             value = mc.get(cache_key)
             yield value.datFragment

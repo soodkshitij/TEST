@@ -202,7 +202,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                 #temp code
                 l_data = (req.putRequest.datFragment.data).decode("utf-8")
                 print (l_data)
-                print ("length of data is ",len(l_data.split('\n')))
+                #print ("length of data is ",len(l_data.split('\n')))
                 
                 
                 if not serverlist:
@@ -223,6 +223,9 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                         serverlist.pop(st_idx)
                         if not serverlist:
                             return server_pb2.Response(code=2)
+                        if st_idx > len(serverlist)-1:
+                            print("chanhing st_idx to 0",st_idx)
+                            st_idx=0
                         node_id = serverlist[st_idx]
                 
         return server_pb2.Response(code=1)
