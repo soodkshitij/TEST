@@ -88,7 +88,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                         print("incrementing null count")
                         null_count+=1
                         continue
-                    if request.fromSender =="prof":
+                    if request.fromSender =="external-client":
                         yield(provideJson(d))
                     else:
                         yield(d)
@@ -98,7 +98,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                     break
         else:
             print ("bloom filter said no")
-            if request.fromSender =="prof":
+            if request.fromSender =="external-client":
                 external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
                 external_hosts = external_hosts.split(",")
                 request.fromSender = ""
@@ -142,21 +142,15 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
             return_queue.put(None)
             
     def connect_to_node(self, node_id,request,return_queue):
-        #channel = grpc.insecure_channel(hostdetails)
-        #stub = request_pb2_grpc.CommunicationServiceStub(channel)
         client = self.node.get_client(node_id)
-        print("at..." + str(node_id))
-        print("Inside connect_to_node",request.getRequest.queryParams)
-        stream = client.GetFromLocalCluster(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
-        for res in stream:
-            print ("inserting into queue")
-            if res.datFragment.data:
-                print(res.datFragment.data)
-                print("yes data")
-                return_queue.put(res)
-            else:
-                print (res.datFragment.data)
-                print ("no data")
+        if client is not None:
+            print("at..." + str(node_id))
+            print("Inside connect_to_node",request.getRequest.queryParams)
+            stream = client.GetFromLocalCluster(request.getRequest.queryParams.from_utc, request.getRequest.queryParams.to_utc)
+            for res in stream:
+                print ("inserting into queue")
+                if res.datFragment.data:
+                    return_queue.put(res)
         return_queue.put(None)    
         
     def GetFromLocalCluster(self, request, context):
@@ -172,7 +166,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         yield_count = 1
         while(offset<=data_count):
             query_data = mongoTestNew.get_data(fromTimestamp, toTimestamp, offset, limit, request.getRequest.queryParams.params_json)
-            response = server_pb2.Response(code=1, msg="froms-1",
+            response = server_pb2.Response(code=1,
                                        metaData = server_pb2.MetaData(uuid="",numOfFragment=int(data_count)),
                                        datFragment = server_pb2.DatFragment(timestamp_utc="",data=str(query_data).encode(encoding='utf_8'))
                                        )
@@ -186,9 +180,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         client = self.node.get_client(node_id)
         res = client.PutToLocalCluster((req.putRequest.datFragment.data).decode('utf-8'))
         if res.code!=1:
-            print("returning false")
             return False
-        print("returning true")
         return True            
             
     def putHandler(self, request_iterator, context):
@@ -200,7 +192,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         for req in request_iterator:
                 
                 #temp code
-                l_data = (req.putRequest.datFragment.data).decode("utf-8")
+                #l_data = (req.putRequest.datFragment.data).decode("utf-8")
                 #print (l_data)
                 #print ("length of data is ",len(l_data.split('\n')))
                 
@@ -239,7 +231,6 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         return server_pb2.Response(code=1)    
     
     def ping(self,req, context):
-        print ("Inside server ping")
         return server_pb2.Response(code=1)
     
     def getUniqueDateIds(self,request, context):
@@ -309,7 +300,7 @@ def provideJson(chunk):
             'P24I':dlineValues[15]
         }
         jsonChunk.append(json.dumps(dlineJsonValues))
-    responseChunk = server_pb2.Response(code=1, msg="froms-1",
+    responseChunk = server_pb2.Response(code=1,
                                        metaData = server_pb2.MetaData(uuid="",numOfFragment=int(chunk.metaData.numOfFragment)),
                                        datFragment = server_pb2.DatFragment(timestamp_utc="",data=str((',').join(jsonChunk)).encode(encoding='utf_8'))
                                        )

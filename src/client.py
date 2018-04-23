@@ -24,6 +24,7 @@ class Client():
         self.channel = grpc.insecure_channel('%s:%d' % (host, port))
         self.stub = server_pb2_grpc.CommunicationServiceStub(self.channel)
         self.port = port
+        self.host = host
         
     def getClientStatus(self, requested_by=0):
         req = (server_pb2.ReplicationRequest(id=requested_by))
@@ -49,20 +50,18 @@ class Client():
             yield value.datFragment
         else:
             req = server_pb2.Request(
-                fromSender='some put sender',
-                toReceiver='some put receiver',
+                fromSender=self.host,
             getRequest=server_pb2.GetRequest(
-              metaData=server_pb2.MetaData(uuid='14829'),
+              metaData=server_pb2.MetaData(uuid=''),
               queryParams=server_pb2.QueryParams(from_utc=from_timestamp,to_utc=to_timestamp))
             )
             for stream in self.stub.getHandler(req):
-                mc.set(cache_key,stream)
+                #mc.set(cache_key,stream)
                 yield(stream)
             
     def GetFromLocalCluster(self, from_timestamp, to_timestamp):
         req = server_pb2.Request(
-            fromSender='some put sender',
-            toReceiver='some put receiver',
+            fromSender=self.host,
         getRequest=server_pb2.GetRequest(
           metaData=server_pb2.MetaData(uuid='14829'),
           queryParams=server_pb2.QueryParams(from_utc=from_timestamp,to_utc=to_timestamp))
@@ -70,32 +69,31 @@ class Client():
         print("Client GetFromLocalCluster",req)
         for stream in self.stub.GetFromLocalCluster(req):
             yield(stream)
-        
-#     def putHandler(self,putData):
-#         return self.stub.putHandler(self.create_streaming_request(putData))
+            
+    def putHandler(self, putData):
+        print("inside puthandler")
+        return self.stub.putHandler(self.create_streaming_request_for_local_put(putData))
 
-    def putHandler(self,file_path):
-        print("Inside put handler for ",file_path)
+    def streamFile(self,file_path):
+        print("Inside file streaming ",file_path)
         return self.stub.putHandler(self.create_streaming_request(file_path))
     
     def create_streaming_request(self,file):
         print("create_streaming_request ",file)
         for x in chunktest.process(None,request=False,name=file):
             req = server_pb2.Request(
-                fromSender='some put sender',
-                toReceiver='some put receiver',
+                fromSender=self.host,
             putRequest=server_pb2.PutRequest(
-              metaData=server_pb2.MetaData(uuid='14829'),
+              metaData=server_pb2.MetaData(uuid=''),
               datFragment=server_pb2.DatFragment(data= str("".join(x)).encode(encoding='utf_8'))
             ))
             yield req
             
     def create_streaming_request_for_local_put(self, data):
         req = server_pb2.Request(
-            fromSender='some put sender',
-            toReceiver='some put receiver',
+            fromSender=self.host,
         putRequest=server_pb2.PutRequest(
-          metaData=server_pb2.MetaData(uuid='14829'),
+          metaData=server_pb2.MetaData(uuid=''),
           datFragment=server_pb2.DatFragment(data= str(data).encode(encoding='utf_8'))
         ))
         yield req
@@ -110,15 +108,11 @@ class Client():
         for x in chunktest.process(None,request=False,name=file):
             (self.putHandler("".join(x)))
             
-    def ping(self,data_msg):
-        print ("Insid ping")
+    def ping(self,data_msg=""):
         req = server_pb2.Request(
-            fromSender='some put sender',
-            toReceiver='some put receiver',
-        ping=server_pb2.PingRequest(
-          msg = data_msg
+            ping=server_pb2.PingRequest(
+            msg = data_msg
         ))
-        print(req)
         return self.stub.ping(req)
     
     def getUniqueDateIds(self):
@@ -133,6 +127,7 @@ class Client():
 
 
 def run():
+    global host
     config.populate()
     node_id = config.get_node_id()
     node_details = config.get_node_details(node_id)

@@ -27,9 +27,9 @@ for file_name in list_of_files:
 	print ("file_name",file_name)
 	if file_name.endswith('.out'):
 		# mesowest format ending with .out
-		c.putHandler(file_name)
+		c.streamFile(file_name)
 	elif '_' in file_name and file_name.endswith('.csv'):
 		# Assuming Mesonet has <date>_<time> format
-		c.putHandler(file_name)
+		c.streamFile(file_name)
 	else:
 		print("Nothing do for this file")

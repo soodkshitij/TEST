@@ -62,7 +62,9 @@ class Server():
                 #check whether active
                 (self.clients.get(node_id))['client_obj'] = None
                 (self.clients.get(node_id))['active'] = False
-                client_obj.pingInternal()
+                if client_obj.pingInternal():
+                    (self.clients.get(node_id))['client_obj'] = client_obj
+                    (self.clients.get(node_id))['active'] = True
             except:
                 logger.info("Node {} not reachable".format(node_id))
                 return None
