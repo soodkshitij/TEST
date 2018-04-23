@@ -10,7 +10,7 @@ import requests
 import pylibmc #for mac
 #import memcache   #for windows
 
-mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})  #for mac
+#mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})  #for mac
 #mc = memcache.Client(['127.0.0.1:11211'], debug=0)   #for windows
 
 logger = lg.get_logger()
@@ -43,21 +43,21 @@ class Client():
         return self.stub.getLeaderNode(server_pb2.ReplicationRequest(id=node_id))
     
     def getHandler(self, from_timestamp, to_timestamp):
-        cache_key = str(from_timestamp).replace(" ","") + str(to_timestamp).replace(" ","")
-        if 10>11:
-            print("in cache"+cache_key)
-            value = mc.get(cache_key)
-            yield value.datFragment
-        else:
-            req = server_pb2.Request(
-                fromSender=self.host,
-            getRequest=server_pb2.GetRequest(
-              metaData=server_pb2.MetaData(uuid=''),
-              queryParams=server_pb2.QueryParams(from_utc=from_timestamp,to_utc=to_timestamp))
-            )
-            for stream in self.stub.getHandler(req):
-                #mc.set(cache_key,stream)
-                yield(stream)
+        #cache_key = str(from_timestamp).replace(" ","") + str(to_timestamp).replace(" ","")
+        #if 10>11:
+            #print("in cache"+cache_key)
+            #value = mc.get(cache_key)
+            #yield value.datFragment
+        #else:
+        req = server_pb2.Request(
+            fromSender=self.host,
+        getRequest=server_pb2.GetRequest(
+            metaData=server_pb2.MetaData(uuid=''),
+            queryParams=server_pb2.QueryParams(from_utc=from_timestamp,to_utc=to_timestamp))
+        )
+        for stream in self.stub.getHandler(req):
+            #mc.set(cache_key,stream)
+            yield(stream)
             
     def GetFromLocalCluster(self, from_timestamp, to_timestamp):
         req = server_pb2.Request(
