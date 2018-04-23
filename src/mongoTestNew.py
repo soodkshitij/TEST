@@ -69,7 +69,7 @@ def put_data(request):
     for line in content.split('\n'):
         line = line.strip()
         splittedArray =  line.split(',')
-        print (type(line))
+        #print (type(line))
         #if len(splittedArray) > MESOWEST_MIN_ROW_SIZE and splittedArray[0] != "STN":
         if 'NULL' not in line:
             try:
@@ -82,6 +82,7 @@ def put_data(request):
                 bulkInsertArray.append(doc)
             except:
                 print("Exception while inserting to mongo")
+                print (line)
                 pass
                 
             

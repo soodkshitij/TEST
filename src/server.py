@@ -201,7 +201,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                 
                 #temp code
                 l_data = (req.putRequest.datFragment.data).decode("utf-8")
-                print (l_data)
+                #print (l_data)
                 #print ("length of data is ",len(l_data.split('\n')))
                 
                 

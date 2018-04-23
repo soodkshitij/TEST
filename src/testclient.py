@@ -34,4 +34,4 @@ while d <= toDate:
 
 #print(c.GetHandler(1, 2))
 
-print(c.putHandler("data/mesowest.out"))
+print(c.putHandler("data/20050621_0800.csv"))
