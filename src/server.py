@@ -17,11 +17,6 @@ from createbloomfilter import CreateBloomFilter
 import requests
 import time
 import datetime
-import pylibmc #for mac
-#import memcache   #for windows
-
-mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})
-#mc = memcache.Client(['127.0.0.1:11211'], debug=0)   #for windows
 
 q = Queue(maxsize=0)
 dqueue = []
@@ -60,96 +55,76 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         return server_pb2.ReplicationRequest(id=leader_node)
     
     def getHandler(self, request, context):
-        cache_key = str(request.getRequest.queryParams.from_utc) + str(request.getRequest.queryParams.to_utc)
-        if cache_key in mc:
-            print("here")
-            print(cache_key)
-            value = mc.get(cache_key)
-            print(value)
-            yield value.datFragment
-        else:
-            print(request)
-            #checking bloomfilter
-            d = int(time.mktime(time.strptime(request.getRequest.queryParams.from_utc, '%Y-%m-%d %H:%M:%S')))
-            toDate = int(time.mktime(time.strptime(request.getRequest.queryParams.to_utc, '%Y-%m-%d %H:%M:%S')))
-            process_internal = False
+        print(request)
+        #checking bloomfilter
+        d = int(time.mktime(time.strptime(request.getRequest.queryParams.from_utc, '%Y-%m-%d %H:%M:%S')))
+        toDate = int(time.mktime(time.strptime(request.getRequest.queryParams.to_utc, '%Y-%m-%d %H:%M:%S')))
+        process_internal = False
 
-            while d <= toDate:
-                date_to_check = (datetime.datetime.fromtimestamp(d).strftime('%Y%m%d'))
-                c = self.node.bloomfilter
-                if c.testdate(date_to_check):
-                    print ("bloom filter said yes")
-                    process_internal = True
-                    break
-                d += (24*60*60)
+        while d <= toDate:
+            date_to_check = (datetime.datetime.fromtimestamp(d).strftime('%Y%m%d'))
+            c = self.node.bloomfilter
+            if c.testdate(date_to_check):
+                print ("bloom filter said yes")
+                process_internal = True
+                break
+            d += (24*60*60)
+        
+        if process_internal:
+            serverlist=self.node.get_active_node_ids()
+            return_queue = Queue(maxsize=0)
+            for node_id in serverlist:
+                print("Connecting to node",node_id)
+                assign_to_node = (Thread(target=self.connect_to_node, args =(node_id,request,return_queue,)))
+                assign_to_node.setDaemon(True)
+                assign_to_node.start()
             
-            if process_internal:
-                serverlist=self.node.get_active_node_ids()
-                return_queue = Queue(maxsize=0)
-                for node_id in serverlist:
-                    print("Connecting to node",node_id)
-                    assign_to_node = (Thread(target=self.connect_to_node, args =(node_id,request,return_queue,)))
+            null_count = 0        
+            while(True):
+                if (return_queue.qsize()):
+                    print("queue data ",return_queue.qsize())
+                    d = return_queue.get()
+                    if not d:
+                        print("incrementing null count")
+                        null_count+=1
+                        continue
+                    if request.fromSender =="external-client":
+                        yield(provideJson(d))
+                    else:
+                        yield(d)
+                
+                if null_count==len(serverlist):
+                    print ("Breaking null check with null_count",null_count)
+                    break
+        else:
+            print ("bloom filter said no")
+            if request.fromSender =="external-client":
+                external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
+                external_hosts = external_hosts.split(",")
+                request.fromSender = ""
+                leader_details = config.get_node_details(self.node.leader_id)
+                return_queue_external = Queue(maxsize=0)
+                for host_details in external_hosts:
+                    if host_details==leader_details[0]:
+                        continue
+                    print("Connecting to host",host_details)
+                    assign_to_node = (Thread(target=self.connect_to_external_node, args =(host_details,request,return_queue_external,)))
                     assign_to_node.setDaemon(True)
                     assign_to_node.start()
-                
-                null_count = 0        
+                null_count = 0
                 while(True):
-                    if (return_queue.qsize()):
-                        print("queue data ",return_queue.qsize())
-                        d = return_queue.get()
+                    if (return_queue_external.qsize()):
+                        print("queue data ",return_queue_external.qsize())
+                        d = return_queue_external.get()
                         if not d:
                             print("incrementing null count")
                             null_count+=1
                             continue
-                        if request.fromSender =="external-client":
-                            if cache_key in mc:
-                                mc.append(cache_key,provideJson(d),time = 200)
-                            else:    
-                                mc.set(cache_key,provideJson(d),time = 200)
-                            yield(provideJson(d))   
-                        else:
-                            if cache_key in mc:
-                                mc.append(cache_key,d,time = 200)
-                            else:    
-                                mc.set(cache_key,d,time = 200)
-                            yield(d)
+                        yield(provideJson(d))
                     
-                    if null_count==len(serverlist):
+                    if null_count==len(external_hosts)-1:
                         print ("Breaking null check with null_count",null_count)
                         break
-            else:
-                print ("bloom filter said no")
-                if request.fromSender =="external-client":
-                    external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
-                    external_hosts = external_hosts.split(",")
-                    request.fromSender = ""
-                    leader_details = config.get_node_details(self.node.leader_id)
-                    return_queue_external = Queue(maxsize=0)
-                    for host_details in external_hosts:
-                        if host_details==leader_details[0]:
-                            continue
-                        print("Connecting to host",host_details)
-                        assign_to_node = (Thread(target=self.connect_to_external_node, args =(host_details,request,return_queue_external,)))
-                        assign_to_node.setDaemon(True)
-                        assign_to_node.start()
-                    null_count = 0
-                    while(True):
-                        if (return_queue_external.qsize()):
-                            print("queue data ",return_queue_external.qsize())
-                            d = return_queue_external.get()
-                            if not d:
-                                print("incrementing null count")
-                                null_count+=1
-                                continue
-                            if cache_key in mc:
-                                mc.append(cache_key,provideJson(d),time = 200)
-                            else:    
-                                mc.set(cache_key,provideJson(d),time = 200)
-                            yield(provideJson(d))
-                        
-                        if null_count==len(external_hosts)-1:
-                            print ("Breaking null check with null_count",null_count)
-                            break
                
     def connect_to_external_node(self, host_details,request,return_queue):
         try:
