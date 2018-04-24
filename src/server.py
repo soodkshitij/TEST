@@ -99,7 +99,8 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         else:
             print ("bloom filter said no")
             if request.fromSender =="external-client":
-                external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
+                #external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
+                external_hosts = "169.254.149.215"
                 external_hosts = external_hosts.split(",")
                 request.fromSender = ""
                 leader_details = config.get_node_details(self.node.leader_id)
@@ -181,7 +182,35 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         res = client.PutToLocalCluster((req.putRequest.datFragment.data).decode('utf-8'))
         if res.code!=1:
             return False
-        return True            
+        return True   
+    
+    def pushDataToExternalCluster(self,req):
+        #external_hosts = requests.get("http://cmpe275-spring-18.mybluemix.net/get").text
+        external_hosts = "169.254.230.239"
+        external_hosts = external_hosts.split(",")
+        req.fromSender = ""
+        leader_details = config.get_node_details(self.node.leader_id)
+        
+         
+        for host_details in external_hosts:
+            if host_details==leader_details[0]:
+                continue
+            
+            try:
+                client = Client(host=host_details,port=8080)
+                print("at..." + str(host_details))
+                print("Inside connect_to_external_node_for_push")
+                res = client.putHandler((req.putRequest.datFragment.data).decode('utf-8'))
+                if res.code==1:
+                    break
+            except Exception as e:
+                print(e)
+                
+                
+            
+            
+            
+    
             
     def putHandler(self, request_iterator, context):
         serverlist=self.node.get_active_node_ids_for_push()
@@ -189,7 +218,13 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
         print("Inside put handler")        
         st_idx = 0
         
+        
+        counter = 0
         for req in request_iterator:
+                if counter%3==0 or not serverlist:
+                    self.pushDataToExternalCluster(req)
+                    counter = counter+1
+                    continue
                 
                 #temp code
                 #l_data = (req.putRequest.datFragment.data).decode("utf-8")
@@ -219,6 +254,7 @@ class RequestHandler(server_pb2_grpc.CommunicationServiceServicer):
                             print("chanhing st_idx to 0",st_idx)
                             st_idx=0
                         node_id = serverlist[st_idx]
+                counter+=1
                 
         return server_pb2.Response(code=1)
     
