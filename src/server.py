@@ -17,8 +17,11 @@ from createbloomfilter import CreateBloomFilter
 import requests
 import time
 import datetime
-import pylibmc
+import pylibmc #for mac
+#import memcache   #for windows
+
 mc = pylibmc.Client(["127.0.0.1:11211"], binary=True,behaviors={"tcp_nodelay": True,"ketama": True})
+#mc = memcache.Client(['127.0.0.1:11211'], debug=0)   #for windows
 
 q = Queue(maxsize=0)
 dqueue = []
