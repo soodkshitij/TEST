@@ -1,4 +1,4 @@
-# Distributed-Data-Store
+# Distributed Data Store For Mesonet & Mesowest data
 
 This Repository contains code to set up a distributed data sharing system amongst multiple clusters. RAFT algorithm has been used as consensus algorithm. The cluster will have following capabilities :
    
