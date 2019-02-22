@@ -41,3 +41,5 @@ Bloom filter - A bloom filter which is the space efficient probabilistic data st
 ## Team Members:
 * Maulik Bhatt
 * Kshitij Sood
+* Ardalan Razavi
+* Astha Kumar
